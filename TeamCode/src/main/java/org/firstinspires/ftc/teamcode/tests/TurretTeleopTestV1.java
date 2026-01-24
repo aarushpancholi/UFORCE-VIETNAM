@@ -35,9 +35,9 @@ public class TurretTeleopTestV1 extends OpMode {
 
         turret = new Turret(hardwareMap, null);
         follower = createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(0,0,Math.toRadians(90)));
+        follower.setStartingPose(new Pose(140,0,Math.toRadians(90)));
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-        Localization.init(follower);
+        Localization.init(follower, telemetry);
 
         telemetry.addLine("Initialized. Press START to enable auto-aim.");
         telemetry.addLine("Make sure goal pose headings are radians (Math.toRadians(90)).");
@@ -65,36 +65,38 @@ public class TurretTeleopTestV1 extends OpMode {
         );
 
         // Run your turret auto-aim logic
+        if (gamepad1.a) {
+            turret.resetTurretEncoder();
+        }
         turret.periodic();
-
 
         // Debug telemetry
         Pose robotPose = follower.getPose();
         double robotHeading = Localization.getHeading(); // expected radians
 
-        double turretRelHeading = turret.encoderToTurretHeading();
-        double turretAbsHeading = AngleUnit.normalizeRadians(robotHeading + turretRelHeading);
+//        double turretRelHeading = turret.encoderToTurretHeading();
+//        double turretAbsHeading = AngleUnit.normalizeRadians(robotHeading + turretRelHeading);
 
         // What your code is using internally
-        double diffFromYourHelper = Localization.getBlueHeadingDiff(turretAbsHeading);
-
-        // Independent sanity check: bearing to goal from (x,y)
-        double dx = RobotConstants.blueGoalPose.getX() - robotPose.getX();
-        double dy = RobotConstants.blueGoalPose.getY() - robotPose.getY();
-        double goalBearingAbs = Math.atan2(dy, dx);
-        double diffFromBearing = AngleUnit.normalizeRadians(goalBearingAbs - turretAbsHeading);
-
-        telemetry.addData("Aimed", turret.isAimed());
-        telemetry.addData("Robot Pose (x,y,hdeg)",
-                String.format("%.1f, %.1f, %.1f",
-                        robotPose.getX(), robotPose.getY(), Math.toDegrees(robotPose.getHeading())));
-        telemetry.addData("Robot Heading (deg)", Math.toDegrees(robotHeading));
-        telemetry.addData("Turret Rel (deg)", Math.toDegrees(turretRelHeading));
-        telemetry.addData("Turret Abs (deg)", Math.toDegrees(turretAbsHeading));
-
-        telemetry.addData("BlueDiff helper (deg)", Math.toDegrees(diffFromYourHelper));
-        telemetry.addData("Goal bearing (deg)", Math.toDegrees(goalBearingAbs));
-        telemetry.addData("Diff bearing (deg)", Math.toDegrees(diffFromBearing));
+//        double diffFromYourHelper = Localization.getBlueHeadingDiff(turretAbsHeading);
+//
+//        // Independent sanity check: bearing to goal from (x,y)
+//        double dx = RobotConstants.blueGoalPose.getX() - robotPose.getX();
+//        double dy = RobotConstants.blueGoalPose.getY() - robotPose.getY();
+//        double goalBearingAbs = Math.atan2(dy, dx);
+//        double diffFromBearing = AngleUnit.normalizeRadians(goalBearingAbs - turretAbsHeading);
+//
+//        telemetry.addData("Aimed", turret.isAimed());
+//        telemetry.addData("Robot Pose (x,y,hdeg)",
+//                String.format("%.1f, %.1f, %.1f",
+//                        robotPose.getX(), robotPose.getY(), Math.toDegrees(robotPose.getHeading())));
+//        telemetry.addData("Robot Heading (deg)", Math.toDegrees(robotHeading));
+//        telemetry.addData("Turret Rel (deg)", Math.toDegrees(turretRelHeading));
+//        telemetry.addData("Turret Abs (deg)", Math.toDegrees(turretAbsHeading));
+//
+//        telemetry.addData("BlueDiff helper (deg)", Math.toDegrees(diffFromYourHelper));
+//        telemetry.addData("Goal bearing (deg)", Math.toDegrees(goalBearingAbs));
+//        telemetry.addData("Diff bearing (deg)", Math.toDegrees(diffFromBearing));
 
         telemetry.update();
     }

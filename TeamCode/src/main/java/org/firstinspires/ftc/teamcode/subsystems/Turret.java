@@ -1,16 +1,16 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import static org.firstinspires.ftc.teamcode.globals.Localization.getBlueHeadingDiff;
+import static org.firstinspires.ftc.teamcode.globals.Localization.getRedHeadingDiff;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.maxTurretPos;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.minTurretPos;
 
 import com.bylazar.telemetry.TelemetryManager;
-import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.controller.PIDFController;
 import com.seattlesolvers.solverslib.hardware.motors.Motor;
 import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
-import com.seattlesolvers.solverslib.util.InterpLUT;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Localization;
@@ -20,39 +20,39 @@ public class Turret extends SubsystemBase {
 
     private boolean autoAimEnabled = false;
 
-    private double kP = 0.05;     // tune
-    private double maxPower = 0.8; // tune
-    
+    // Turret mechanical range in degrees: [-135, +135]
+    private static final double MIN_TURRET_RAD = Math.toRadians(-135);
+    private static final double MAX_TURRET_RAD = Math.toRadians(135);
 
-//    private double kP = 0;
-//    PIDFController turretPIDFController = new PIDFController(kP, kI, kD, kF);
+    // Lead compensation (Fix 2): predicts heading slightly forward
+    private static final double HEADING_LEAD_SEC = 0.08; // tune 0.03–0.12
 
-    InterpLUT lut = new InterpLUT();
-    InterpLUT inverseLut = new InterpLUT();
+    // PIDF (tune these)
+    private final PIDFController turretPID = new PIDFController(
+            0.012,   // kP
+            0.0,    // kI
+            0.001,  // kD
+            0.0     // kF
+    );
+
+    private static final int TICKS_TOLERANCE = 7;
+    private double maxPower = 1;
+
+    private int targetTicks = 168;
 
     public Turret(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
         turret = new MotorEx(hardwareMap, "turret");
-        turret.setRunMode(Motor.RunMode.PositionControl);
+        turret.setRunMode(Motor.RunMode.RawPower);
         turret.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        turret.setPositionCoefficient(kP);
-        turret.setPositionTolerance(10);
         turret.setInverted(true);
-        turret.stopAndResetEncoder();
-
-//        turretPos = turret.getCurrentPosition();
-//        robotHeading = Pinpoint.getHeading();
-//        fieldCentricHeading = robotHeading + encoderToTurretHeading();
-
-        lut.add(minTurretPos, r(-135));
-        lut.add(maxTurretPos, r(135));
-        inverseLut.add(r(-135), minTurretPos);
-        inverseLut.add(r(135), maxTurretPos);
-        lut.createLUT();
-        inverseLut.createLUT();
     }
 
     public void straight() {
+        setTargetTicks(168);
+    }
 
+    public void setTargetTicks(int ticks) {
+        targetTicks = (int) Range.clip(ticks, minTurretPos, maxTurretPos);
     }
 
     public void resetTurretEncoder() {
@@ -62,48 +62,114 @@ public class Turret extends SubsystemBase {
     public double getPos() {
         return turret.getCurrentPosition();
     }
+
     public void setAutoAim(boolean enabled) {
         autoAimEnabled = enabled;
-        if (!enabled) turret.set(0);
+        if (!enabled) {
+            turret.set(0);
+            turretPID.reset();
+        }
     }
 
     @Override
     public void periodic() {
-        if (!autoAimEnabled) return;
+        if (autoAimEnabled) {
+            // Robot heading + lead prediction (Fix 2)
+            double robotHeading = Localization.getHeading();           // rad
+            double omega = Localization.getHeadingVelocity();          // rad/s
+            double robotHeadingPred = AngleUnit.normalizeRadians(robotHeading + omega * HEADING_LEAD_SEC);
 
-        double robotHeading = Localization.getHeading();              // radians :contentReference[oaicite:5]{index=5}
-        double turretRelHeading = encoderToTurretHeading();       // radians (after LUT fix)
-        double turretAbsHeading = AngleUnit.normalizeRadians(robotHeading + turretRelHeading);
+            // Current turret headings
+            double turretRelHeading = posToHeading(getPos());          // rad in [-135,+135]
+            double turretAbsHeading = AngleUnit.normalizeRadians(robotHeadingPred + turretRelHeading);
 
-        double headingDiffToGoal = getBlueHeadingDiff(turretAbsHeading); // should be radians :contentReference[oaicite:6]{index=6}
-        double targetAbsHeading = AngleUnit.normalizeRadians(turretAbsHeading + headingDiffToGoal);
+            // Target absolute heading on field
+            double headingDiffToGoal = getRedHeadingDiff(turretAbsHeading); // rad
+            double targetAbsHeading = AngleUnit.normalizeRadians(turretAbsHeading + headingDiffToGoal);
 
-        double targetRelHeading = AngleUnit.normalizeRadians(targetAbsHeading - robotHeading);
-//        if (targetRelHeading > r(135) || targetRelHeading < r(-135)) {
-//            targetRelHeading = ((targetRelHeading + r(135))%r(135))-r(135);
-//        }
-        double targetTurretPos = headingToEncoder(targetRelHeading);
+            // Convert to desired turret-relative angle, handle wrap + bounds behavior
+            double relToTarget = targetAbsHeading - robotHeadingPred;  // intentionally not normalized first
+            double chosenRel = chooseTurretRelHeading(relToTarget, turretRelHeading);
 
-        targetTurretPos = Range.clip(targetTurretPos, minTurretPos, maxTurretPos);
+            // Convert to ticks and clamp
+            targetTicks = (int) Range.clip(headingToPos(chosenRel), minTurretPos, maxTurretPos);
+        }
 
-        turret.setTargetPosition((int) targetTurretPos);
-        turret.set(maxPower); // always apply “speed cap” so it can hold/correct
+        // PIDF to targetTicks
+        turretPID.setSetPoint(targetTicks);
 
-    }
-    
-    public double r(double val) {
-        return Math.toRadians(val);
+        double current = turret.getCurrentPosition();
+        double power = turretPID.calculate(current);
+        power = Range.clip(power, -maxPower, maxPower);
+
+        // Grinding protection: don't push further into a hard limit
+        int pos = (int) current;
+        boolean atMin = pos <= (minTurretPos + 2);
+        boolean atMax = pos >= (maxTurretPos - 2);
+        if ((atMin && power < 0) || (atMax && power > 0)) {
+            power = 0;
+            turretPID.reset();
+        }
+
+        turret.set(power);
     }
 
     public boolean isAimed() {
-        return turret.atTargetPosition();
+        return Math.abs(targetTicks - turret.getCurrentPosition()) <= TICKS_TOLERANCE;
     }
 
-    public double encoderToTurretHeading() {
-        return lut.get(getPos());
+    // -----------------------------
+    // Linear mapping (ticks <-> radians)
+    // -----------------------------
+
+    private double posToHeading(double posTicks) {
+        double pos = Range.clip(posTicks, minTurretPos, maxTurretPos);
+        double t = (pos - minTurretPos) / (maxTurretPos - minTurretPos); // 0..1
+        return MIN_TURRET_RAD + t * (MAX_TURRET_RAD - MIN_TURRET_RAD);
     }
 
-    public double headingToEncoder(double heading) {
-        return inverseLut.get(heading);
+    private double headingToPos(double headingRad) {
+        double h = Range.clip(headingRad, MIN_TURRET_RAD, MAX_TURRET_RAD);
+        double t = (h - MIN_TURRET_RAD) / (MAX_TURRET_RAD - MIN_TURRET_RAD); // 0..1
+        return minTurretPos + t * (maxTurretPos - minTurretPos);
+    }
+
+    // -----------------------------
+    // Angle selection / bounds behavior
+    // -----------------------------
+
+    private double chooseTurretRelHeading(double relRad, double currentTurretRelRad) {
+        double base = AngleUnit.normalizeRadians(relRad);
+
+        double[] candidates = new double[] { base, base + 2.0 * Math.PI, base - 2.0 * Math.PI };
+
+        // If reachable, pick the in-range candidate closest to current turret angle
+        double bestInRange = Double.NaN;
+        double bestDist = Double.POSITIVE_INFINITY;
+
+        for (double c : candidates) {
+            if (c >= MIN_TURRET_RAD && c <= MAX_TURRET_RAD) {
+                double d = Math.abs(c - currentTurretRelRad);
+                if (d < bestDist) {
+                    bestDist = d;
+                    bestInRange = c;
+                }
+            }
+        }
+        if (!Double.isNaN(bestInRange)) return bestInRange;
+
+        // Otherwise "stick" to the closest bound (clamp each candidate, pick closest to current)
+        double bestClamped = 0.0;
+        bestDist = Double.POSITIVE_INFINITY;
+
+        for (double c : candidates) {
+            double clamped = Range.clip(c, MIN_TURRET_RAD, MAX_TURRET_RAD);
+            double d = Math.abs(clamped - currentTurretRelRad);
+            if (d < bestDist) {
+                bestDist = d;
+                bestClamped = clamped;
+            }
+        }
+        return bestClamped;
     }
 }

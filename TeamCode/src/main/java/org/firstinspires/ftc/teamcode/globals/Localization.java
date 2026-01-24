@@ -3,24 +3,58 @@ package org.firstinspires.ftc.teamcode.globals;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.blueGoalPose;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.redGoalPose;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class Localization {
     private static Follower follower;
+    private static TelemetryManager telemetry;
 
-    public static void init(Follower f) {
+    // Heading velocity estimation
+    private static final ElapsedTime timer = new ElapsedTime();
+    private static double lastHeading = 0.0;     // rad
+    private static double headingVel = 0.0;      // rad/s (filtered)
+    private static final double VEL_ALPHA = 0.25; // 0..1 (higher = less smoothing)
+
+    public static void init(Follower f, TelemetryManager telemetryManager) {
         follower = f;
+        telemetry = telemetryManager;
+
+        // Seed state so first velocity calc isn't garbage
+        follower.update();
+        lastHeading = follower.getHeading();
+        headingVel = 0.0;
+        timer.reset();
     }
 
     public static void update() {
+        double dt = timer.seconds();
+        timer.reset();
+
         follower.update();
+        double h = follower.getHeading();
+        telemetry.addData("dt", dt);
+
+        if (dt > 1e-3) {
+            double dh = AngleUnit.normalizeRadians(h - lastHeading);
+            double rawVel = dh / dt;
+            headingVel = (1.0 - VEL_ALPHA) * headingVel + VEL_ALPHA * rawVel;
+            telemetry.addData("dh", dh);
+        }
+
+        lastHeading = h;
     }
 
     public static double getHeading() {
         return follower.getHeading();
+    }
+
+    public static double getHeadingVelocity() {
+        return headingVel;
     }
 
     public static double getX() {
