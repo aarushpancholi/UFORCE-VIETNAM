@@ -49,7 +49,6 @@ public class IntakeTest {
         servoB.setPower(0);
     }
 
-
     public void secondIntakeReverse() {
         servoA.setPower(-1);
         servoB.setPower(-1);
