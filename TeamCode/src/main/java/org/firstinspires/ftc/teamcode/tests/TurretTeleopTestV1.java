@@ -1,0 +1,106 @@
+package org.firstinspires.ftc.teamcode.tests;
+
+
+import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower;
+
+import android.annotation.SuppressLint;
+
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.globals.Localization;
+import org.firstinspires.ftc.teamcode.globals.RobotConstants;
+import org.firstinspires.ftc.teamcode.subsystems.Turret;
+
+@Configurable
+@TeleOp(name = "Turret Auto Aim Test V1", group = "TeleOp")
+public class TurretTeleopTestV1 extends OpMode {
+    private Turret turret;
+    private Follower follower;
+    private TelemetryManager telemetry;
+
+    @Override
+    public void init() {
+        // Initializes the static Pinpoint wrapper (sets Pinpoint.pinpoint)
+//        new Pinpoint(hardwareMap, telemetry);
+
+        // Grab the same localizer so we can call update() explicitly
+//        pinpointLocalizer = hardwareMap.get(PinpointLocalizer.class, "pinpoint");
+
+        turret = new Turret(hardwareMap, null);
+        follower = createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(0,0,Math.toRadians(90)));
+        telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+        Localization.init(follower);
+
+        telemetry.addLine("Initialized. Press START to enable auto-aim.");
+        telemetry.addLine("Make sure goal pose headings are radians (Math.toRadians(90)).");
+        telemetry.update();
+    }
+
+    @Override
+    public void start() {
+        turret.setAutoAim(true);
+        follower.startTeleOpDrive();
+    }
+
+    @SuppressLint("DefaultLocale")
+    @Override
+    public void loop() {
+        // Keep localization fresh
+        // (If your PinpointLocalizer uses a different update method name, change this line.)
+        telemetry.addData("encoder", turret.getPos());
+        Localization.update();
+        follower.setTeleOpDrive(
+                -gamepad1.left_stick_y,
+                -gamepad1.left_stick_x,
+                -gamepad1.right_stick_x,
+                true
+        );
+
+        // Run your turret auto-aim logic
+        turret.periodic();
+
+
+        // Debug telemetry
+        Pose robotPose = follower.getPose();
+        double robotHeading = Localization.getHeading(); // expected radians
+
+        double turretRelHeading = turret.encoderToTurretHeading();
+        double turretAbsHeading = AngleUnit.normalizeRadians(robotHeading + turretRelHeading);
+
+        // What your code is using internally
+        double diffFromYourHelper = Localization.getBlueHeadingDiff(turretAbsHeading);
+
+        // Independent sanity check: bearing to goal from (x,y)
+        double dx = RobotConstants.blueGoalPose.getX() - robotPose.getX();
+        double dy = RobotConstants.blueGoalPose.getY() - robotPose.getY();
+        double goalBearingAbs = Math.atan2(dy, dx);
+        double diffFromBearing = AngleUnit.normalizeRadians(goalBearingAbs - turretAbsHeading);
+
+        telemetry.addData("Aimed", turret.isAimed());
+        telemetry.addData("Robot Pose (x,y,hdeg)",
+                String.format("%.1f, %.1f, %.1f",
+                        robotPose.getX(), robotPose.getY(), Math.toDegrees(robotPose.getHeading())));
+        telemetry.addData("Robot Heading (deg)", Math.toDegrees(robotHeading));
+        telemetry.addData("Turret Rel (deg)", Math.toDegrees(turretRelHeading));
+        telemetry.addData("Turret Abs (deg)", Math.toDegrees(turretAbsHeading));
+
+        telemetry.addData("BlueDiff helper (deg)", Math.toDegrees(diffFromYourHelper));
+        telemetry.addData("Goal bearing (deg)", Math.toDegrees(goalBearingAbs));
+        telemetry.addData("Diff bearing (deg)", Math.toDegrees(diffFromBearing));
+
+        telemetry.update();
+    }
+
+    @Override
+    public void stop() {
+        turret.setAutoAim(false);
+    }
+}

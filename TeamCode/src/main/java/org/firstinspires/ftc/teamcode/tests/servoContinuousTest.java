@@ -39,10 +39,6 @@ public class servoContinuousTest extends OpMode {
     @Override
     public void loop() {
         intake.secondIntakeOn();
-        if (opModeTimer.getElapsedTimeSeconds() > 1) {
-            intake.secondIntakeOff();
-            opModeTimer.resetTimer();
-        }
 
         telemetry.update();
 //        shooter.start();
