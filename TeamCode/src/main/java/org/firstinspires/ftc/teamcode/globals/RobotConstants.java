@@ -30,7 +30,7 @@ public class RobotConstants {
     public MotorEx shooterB;
 
     public static Pose blueGoalPose = new Pose(6, 130, Math.toRadians(90));
-    public static Pose redGoalPose  = new Pose(135, 141, Math.toRadians(90));
+    public static Pose redGoalPose  = new Pose(135, 150, Math.toRadians(90));
 
 
 

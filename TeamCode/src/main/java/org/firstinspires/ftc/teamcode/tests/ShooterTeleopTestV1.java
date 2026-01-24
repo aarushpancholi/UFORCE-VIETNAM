@@ -28,6 +28,8 @@ public class ShooterTeleopTestV1 extends OpMode {
     private Shooter shooter;
     private double speed;
     private IntakeTest intake;
+    private Follower follower;
+    private Turret turret;
     private TelemetryManager telemetry;
     private List<Double> speeds;
 
@@ -35,7 +37,11 @@ public class ShooterTeleopTestV1 extends OpMode {
     public void init() {
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         shooter = new Shooter(hardwareMap, telemetry);
+        turret = new Turret(hardwareMap, null);
+        follower = createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(0,0,Math.toRadians(90)));
         intake = new IntakeTest(hardwareMap, null);
+        Localization.init(follower, telemetry);
 
         telemetry.addLine("Initialized");
         telemetry.update();
@@ -44,18 +50,35 @@ public class ShooterTeleopTestV1 extends OpMode {
     @Override
     public void start() {
         shooter.setSpeedRpm(speed);
+        turret.setAutoAim(true);
+        follower.startTeleOpDrive();
     }
 
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
-        intake.intakeOn();
-        if (gamepad1.dpad_left) {
-            intake.secondIntakeReverse();
-        }
-        if (gamepad1.x) {
-            intake.secondIntakeOff();
-        }
+//        if (gamepad1.a) {
+//            intake.intakeOn();
+//        }
+//        if (gamepad1.b) {
+//            intake.intakeReverse();
+//        }
+
+        Localization.update();
+        follower.setTeleOpDrive(
+                -gamepad1.left_stick_y,
+                -gamepad1.left_stick_x,
+                -gamepad1.right_stick_x,
+                true
+        );
+//        turret.periodic();
+
+//        if (gamepad1.dpad_left) {
+//            intake.secondIntakeReverse();
+//        }
+//        if (gamepad1.x) {
+//            intake.secondIntakeOff();
+//        }
         if(gamepad1.dpad_right) {intake.secondIntakeOn();}
         if (gamepad1.dpadUpWasReleased()) {
             speed += 0.5;
@@ -65,6 +88,7 @@ public class ShooterTeleopTestV1 extends OpMode {
         }
         shooter.setSpeedRpm(speed);
 
+//        telemetry.addData("encoder", turret.getPos());
         shooter.periodic();
         speeds = shooter.getSpeed();
         telemetry.addData("speeds", speeds);
