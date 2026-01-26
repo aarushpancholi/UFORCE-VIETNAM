@@ -5,8 +5,6 @@ import static org.firstinspires.ftc.teamcode.globals.Localization.getRedDistance
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.maxHoodPos;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.minHoodPos;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower;
-import static org.firstinspires.ftc.teamcode.subsystems.Shooter.angleFromDistance;
-import static org.firstinspires.ftc.teamcode.subsystems.Shooter.speedFromDistance;
 
 import android.annotation.SuppressLint;
 
@@ -18,10 +16,10 @@ import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Localization;
 import org.firstinspires.ftc.teamcode.globals.RobotConstants;
-import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeTest;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
@@ -29,11 +27,11 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import java.util.List;
 
 @Configurable
-@TeleOp(name = "Shooter test v1", group = "TeleOp")
-public class ShooterTeleopTestV1 extends OpMode {
+@TeleOp(name = "Shooter tuning", group = "TeleOp")
+public class ShooterTuningOp extends OpMode {
     private Shooter shooter;
     private double speed;
-    private Intake intake;
+    private IntakeTest intake;
     private Follower follower;
     private Turret turret;
     private TelemetryManager telemetry;
@@ -43,10 +41,10 @@ public class ShooterTeleopTestV1 extends OpMode {
     public void init() {
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         shooter = new Shooter(hardwareMap, telemetry);
-        turret = new Turret(hardwareMap, telemetry);
+        turret = new Turret(hardwareMap, null);
         follower = createFollower(hardwareMap);
         follower.setStartingPose(new Pose(135,9,Math.toRadians(90)));
-        intake = new Intake(hardwareMap, telemetry);
+        intake = new IntakeTest(hardwareMap, null);
         Localization.init(follower, telemetry);
 
         telemetry.addLine("Initialized");
@@ -56,49 +54,25 @@ public class ShooterTeleopTestV1 extends OpMode {
     @Override
     public void start() {
         shooter.setTargetEPT(speed);
-        shooter.setHood(maxHoodPos);
+        shooter.setHood(minHoodPos);
         follower.startTeleOpDrive();
+        turret.straight();
     }
 
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
         telemetry.addData("encoder", turret.getPos());
-        if (gamepad1.right_trigger > 0.1) {
-            intake.Intake2On();
-            intake.setStopper(0.0);
-        } else {
-            intake.intakeOff();
-            intake.setStopper(1.0);
-            intake.Intake1On();
+        if (gamepad1.a) {
+            intake.intakeOn();
+            intake.secondIntakeOn();
         }
-//        if (gamepad1.left_trigger > 0.1) {
-//            intake.Intake2On();
-//            intake.setStopper(0.0);
-//        } else {
-//            intake.intakeOff();
-//            intake.setStopper(1.0);
-//            intake.Intake1On();
-//        }
-//        if (gamepad1.dpad_up) {
-//            intake.Intake2On();
-//            intake.setStopper(0.0);
-//        }
-        if (gamepad1.y) {
-            intake.intakeOff();
-        }
-
         if (gamepad1.b) {
-            turret.resetTurretEncoder();
+            intake.intakeOff();
+            intake.secondIntakeOff();
         }
 
-        if (gamepad1.right_bumper)
-        {
-            turret.setAutoAim(true);
-        }
-        if (gamepad1.left_bumper) {
-            turret.setAutoAim(false);
-        }
+
         Localization.update();
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
@@ -106,26 +80,35 @@ public class ShooterTeleopTestV1 extends OpMode {
                 -gamepad1.right_stick_x,
                 true
         );
-        turret.periodic();
-
-
-        if (gamepad1.x) {
-            intake.Intake1On();
+        if (gamepad1.right_bumper) {
+            follower.holdPoint(follower.getPose());
         }
-//        if (gamepad1.dpadUpWasReleased()) {
-//            speed += 200;
-//        }
-//        if (gamepad1.dpadDownWasReleased()) {
-//            speed -= 200;
-//        }
-        shooter.setTargetEPT(speedFromDistance(getRedDistance()));
-        shooter.setHood(angleFromDistance(getRedDistance()));
+        if (gamepad1.left_bumper) {
+            follower.startTeleOpDrive();
+        }
 
-//        telemetry.addData("encoder", turret.getPos());
+
+        if (gamepad1.dpadUpWasReleased()) {
+            speed += 25;
+        }
+        if (gamepad1.dpadDownWasReleased()) {
+            speed -= 25;
+        }
+
+        if (gamepad1.dpadLeftWasReleased()) {
+            shooter.setHood(shooter.getHoodPos() + 0.02);
+        }
+        if (gamepad1.dpadRightWasReleased()) {
+            shooter.setHood(shooter.getHoodPos() - 0.02);
+        }
+        shooter.setTargetEPT(speed);
+
+        telemetry.addData("shooter speed", speed);
+        telemetry.addData("hood pos", shooter.getHoodPos());
+        telemetry.addData("distance from red", getRedDistance());
+
+        turret.periodic();
         shooter.periodic();
-        double speed = shooter.getFlywheelEPT();
-        telemetry.addData("speed", speed);
-
         telemetry.update();
     }
 

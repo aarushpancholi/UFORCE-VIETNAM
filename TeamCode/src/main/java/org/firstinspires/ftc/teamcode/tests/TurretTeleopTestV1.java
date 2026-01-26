@@ -46,7 +46,6 @@ public class TurretTeleopTestV1 extends OpMode {
 
     @Override
     public void start() {
-        turret.setAutoAim(true);
         follower.startTeleOpDrive();
     }
 
@@ -68,6 +67,11 @@ public class TurretTeleopTestV1 extends OpMode {
         if (gamepad1.a) {
             turret.resetTurretEncoder();
         }
+
+        if (gamepad1.right_bumper) {
+            turret.setAutoAim(true);
+        }
+
         turret.periodic();
 
         // Debug telemetry

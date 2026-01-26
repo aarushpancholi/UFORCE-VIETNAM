@@ -19,27 +19,30 @@ public class Intake extends SubsystemBase {
     private final DcMotorEx IntakeMotor;
     private final CRServo ServoMotor1;
     private final CRServo ServoMotor2;
+    private final ServoEx stopper;
 
     private TelemetryManager telemetry;
 
     public Intake(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
-        sensor01 = hardwareMap.get(DigitalChannel.class, "sensor01");
+        sensor01 = hardwareMap.get(DigitalChannel.class, "s1");
         sensor01.setMode(DigitalChannel.Mode.INPUT);
 
-        sensor02 = hardwareMap.get(DigitalChannel.class, "sensor02");
+        sensor02 = hardwareMap.get(DigitalChannel.class, "s2");
         sensor02.setMode(DigitalChannel.Mode.INPUT);
 
-        sensor03 = hardwareMap.get(DigitalChannel.class, "sensor03");
+        sensor03 = hardwareMap.get(DigitalChannel.class, "s3");
         sensor03.setMode(DigitalChannel.Mode.INPUT);
 
         IntakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
         IntakeMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
-        ServoMotor1 = hardwareMap.get(CRServo.class, "servoMotor1");
-        ServoMotor2 = hardwareMap.get(CRServo.class, "servoMotor2");
+        stopper = new ServoEx(hardwareMap, "stopper");
 
-        ServoMotor1.setDirection(DcMotorSimple.Direction.REVERSE);
-        ServoMotor2.setDirection(DcMotorSimple.Direction.FORWARD);
+        ServoMotor1 = hardwareMap.get(CRServo.class, "sA");
+        ServoMotor2 = hardwareMap.get(CRServo.class, "sB");
+
+        ServoMotor1.setDirection(DcMotorSimple.Direction.FORWARD);
+        ServoMotor2.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
 
@@ -49,6 +52,10 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
 
+    }
+
+    public void setStopper(double pos) {
+        stopper.set(pos);
     }
 
     public void intakeOff(){

@@ -20,8 +20,8 @@ public class IntakeTest {
 
         servoA = hardwareMap.get(CRServo.class, "sA");
         servoB = hardwareMap.get(CRServo.class, "sB");
-        servoA.setDirection(DcMotorSimple.Direction.REVERSE);
-        servoB.setDirection(DcMotorSimple.Direction.FORWARD);
+        servoA.setDirection(DcMotorSimple.Direction.FORWARD);
+        servoB.setDirection(DcMotorSimple.Direction.REVERSE);
 //        slideMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 //        slideMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         intakeR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
