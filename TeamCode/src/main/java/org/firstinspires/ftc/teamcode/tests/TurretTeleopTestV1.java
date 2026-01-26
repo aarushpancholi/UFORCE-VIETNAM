@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Localization;
 import org.firstinspires.ftc.teamcode.globals.RobotConstants;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
 @Configurable
@@ -24,6 +25,7 @@ public class TurretTeleopTestV1 extends OpMode {
     private Turret turret;
     private Follower follower;
     private TelemetryManager telemetry;
+    private Intake intake;
 
     @Override
     public void init() {
@@ -37,6 +39,7 @@ public class TurretTeleopTestV1 extends OpMode {
         follower = createFollower(hardwareMap);
         follower.setStartingPose(new Pose(140,0,Math.toRadians(90)));
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
+        intake = new Intake(hardwareMap, telemetry);
         Localization.init(follower, telemetry);
 
         telemetry.addLine("Initialized. Press START to enable auto-aim.");
@@ -71,6 +74,7 @@ public class TurretTeleopTestV1 extends OpMode {
         if (gamepad1.right_bumper) {
             turret.setAutoAim(true);
         }
+        intake.testSensors();
 
         turret.periodic();
 
@@ -101,6 +105,7 @@ public class TurretTeleopTestV1 extends OpMode {
 //        telemetry.addData("BlueDiff helper (deg)", Math.toDegrees(diffFromYourHelper));
 //        telemetry.addData("Goal bearing (deg)", Math.toDegrees(goalBearingAbs));
 //        telemetry.addData("Diff bearing (deg)", Math.toDegrees(diffFromBearing));
+
 
         telemetry.update();
     }

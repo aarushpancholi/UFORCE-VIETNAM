@@ -71,15 +71,15 @@ public class Intake extends SubsystemBase {
         ServoMotor2.setPower(1.0);
     }
     public boolean isBallDetected01() {
-        return !sensor01.getState();
+        return sensor01.getState();
     }
 
     public boolean isBallDetected02() {
-        return !sensor02.getState();
+        return sensor02.getState();
     }
 
     public boolean isBallDetected03() {
-        return !sensor03.getState();
+        return sensor03.getState();
     }
 
     public boolean areAllBallsDetected() {
@@ -95,9 +95,11 @@ public class Intake extends SubsystemBase {
         int status02 = isBallDetected02() ? 1 : 0;
         int status03 = isBallDetected03() ? 1 : 0;
 
-        System.out.println("Sensor 01: " + status01);
-        System.out.println("Sensor 02: " + status02);
-        System.out.println("Sensor 03: " + status03);
+        telemetry.addData("Sensor 01 mde: ", sensor01.getMode());
+        telemetry.addData("Sensor 01: ", sensor01.getState());
+        telemetry.addData("Sensor 02: ", status02);
+        telemetry.addData("Sensor 03: ", status03);
+        telemetry.update();
     }
 
     public boolean isIntake1On() {

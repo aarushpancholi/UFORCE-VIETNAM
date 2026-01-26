@@ -32,7 +32,7 @@ import java.util.List;
 @TeleOp(name = "Shooter test v1", group = "TeleOp")
 public class ShooterTeleopTestV1 extends OpMode {
     private Shooter shooter;
-    private double speed;
+    private int speed = 0;
     private Intake intake;
     private Follower follower;
     private Turret turret;
@@ -56,7 +56,6 @@ public class ShooterTeleopTestV1 extends OpMode {
     @Override
     public void start() {
         shooter.setTargetEPT(speed);
-        shooter.setHood(maxHoodPos);
         follower.startTeleOpDrive();
     }
 
@@ -66,10 +65,10 @@ public class ShooterTeleopTestV1 extends OpMode {
         telemetry.addData("encoder", turret.getPos());
         if (gamepad1.right_trigger > 0.1) {
             intake.Intake2On();
-            intake.setStopper(0.0);
+//            intake.setStopper(0.0);
         } else {
             intake.intakeOff();
-            intake.setStopper(1.0);
+//            intake.setStopper(1.0);
             intake.Intake1On();
         }
 //        if (gamepad1.left_trigger > 0.1) {
@@ -112,6 +111,13 @@ public class ShooterTeleopTestV1 extends OpMode {
         if (gamepad1.x) {
             intake.Intake1On();
         }
+
+//        if (gamepad1.dpadUpWasReleased()) {
+//            speed += 100;
+//        }
+//        if (gamepad1.dpadDownWasReleased()) {
+//            speed -= 100;
+//        }
 //        if (gamepad1.dpadUpWasReleased()) {
 //            speed += 200;
 //        }
@@ -123,14 +129,11 @@ public class ShooterTeleopTestV1 extends OpMode {
 
 //        telemetry.addData("encoder", turret.getPos());
         shooter.periodic();
-        double speed = shooter.getFlywheelEPT();
-        telemetry.addData("speed", speed);
 
         telemetry.update();
     }
 
     @Override
     public void stop() {
-        shooter.setHood(minHoodPos);
     }
 }
