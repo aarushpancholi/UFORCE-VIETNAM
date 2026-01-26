@@ -23,7 +23,7 @@ public class Turret extends SubsystemBase {
     private final MotorEx turret;
     private final AprilTagTracking vision;
 
-    private boolean autoAimEnabled = false;
+    public boolean autoAimEnabled = false;
 
     // Turret mechanical range in degrees: [-135, +135]
     private static final double MIN_TURRET_RAD = Math.toRadians(-135);
@@ -65,6 +65,10 @@ public class Turret extends SubsystemBase {
 
     public void straight() {
         setTargetTicks(168);
+    }
+
+    public boolean isStraight() {
+        return (turret.getCurrentPosition() > 165 && turret.getCurrentPosition() < 171);
     }
 
     public void setTargetTicks(int ticks) {

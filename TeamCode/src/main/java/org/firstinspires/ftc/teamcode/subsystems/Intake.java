@@ -7,8 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.hardware.motors.Motor;
-import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 
 public class Intake extends SubsystemBase {
@@ -100,6 +98,18 @@ public class Intake extends SubsystemBase {
         System.out.println("Sensor 01: " + status01);
         System.out.println("Sensor 02: " + status02);
         System.out.println("Sensor 03: " + status03);
+    }
+
+    public boolean isIntake1On() {
+        return IntakeMotor.getPower() > 0.9;
+    }
+
+    public boolean isIntake2On() {
+        return ServoMotor1.getPower() > 0.9;
+    }
+
+    public boolean isIntakeOff() {
+        return IntakeMotor.getPower() < 0.1;
     }
 
     public void autoIntake() {
