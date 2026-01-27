@@ -22,14 +22,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Localization;
 import org.firstinspires.ftc.teamcode.globals.RobotConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
+
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
 import java.util.List;
 
 @Configurable
-@TeleOp(name = "Shooter test v1", group = "TeleOp")
-public class ShooterTeleopTestV1 extends OpMode {
+@TeleOp(name = "drift stuff", group = "TeleOp")
+public class DriftFixing extends OpMode {
     private Shooter shooter;
     private int speed = 0;
     private Intake intake;
@@ -54,80 +55,34 @@ public class ShooterTeleopTestV1 extends OpMode {
 
     @Override
     public void start() {
-        shooter.setTargetEPT(speed);
         follower.startTeleOpDrive();
     }
 
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
-        telemetry.addData("encoder", turret.getPos());
-        if (gamepad1.right_trigger > 0.1) {
-            intake.intake2On();
-            intake.setStopper(0.4);
-        } else {
-            intake.intakeOff();
-            intake.setStopper(0.6);
-            intake.intake1On();
-        }
-//        if (gamepad1.left_trigger > 0.1) {
-//            intake.Intake2On();
-//            intake.setStopper(0.0);
-//        } else {
-//            intake.intakeOff();
-//            intake.setStopper(1.0);
-//            intake.Intake1On();
-//        }
-//        if (gamepad1.dpad_up) {
-//            intake.Intake2On();
-//            intake.setStopper(0.0);
-//        }
-        if (gamepad1.y) {
-            intake.intakeOff();
-        }
-
-        if (gamepad1.b) {
-            turret.resetTurretEncoder();
-        }
-
-        if (gamepad1.right_bumper)
-        {
-            turret.setAutoAim(true);
-        }
-        if (gamepad1.left_bumper) {
-            turret.setAutoAim(false);
-        }
-        Localization.update();
         follower.setTeleOpDrive(
                 -gamepad1.left_stick_y,
                 -gamepad1.left_stick_x,
                 -gamepad1.right_stick_x,
                 true
         );
-        turret.periodic();
-
-
-        if (gamepad1.x) {
-            intake.intake1On();
+        if (gamepad1.right_bumper) {
+            follower.holdPoint(follower.getPose());
         }
-
-//        if (gamepad1.dpadUpWasReleased()) {
-//            speed += 100;
-//        }
-//        if (gamepad1.dpadDownWasReleased()) {
-//            speed -= 100;
-//        }
-//        if (gamepad1.dpadUpWasReleased()) {
-//            speed += 200;
-//        }
-//        if (gamepad1.dpadDownWasReleased()) {
-//            speed -= 200;
-//        }
-        shooter.setTargetEPT(speedFromDistance(getRedDistance()));
-        shooter.setHood(angleFromDistance(getRedDistance()));
-
-//        telemetry.addData("encoder", turret.getPos());
-        shooter.periodic();
+        if (gamepad1.left_bumper) {
+            follower.startTeleOpDrive();
+        }
+        if (gamepad1.dpadRightWasReleased()) {
+            follower.turnDegrees(10, false);
+        }
+        if (gamepad1.dpadLeftWasReleased()) {
+            follower.turnDegrees(10, true);
+        }
+        telemetry.addData("heading localizer", Localization.getHeading());
+        telemetry.addData("distance localizer", Localization.getRedDistance());
+        telemetry.addData("heading follower", follower.getHeading());
+        Localization.update();
 
         telemetry.update();
     }

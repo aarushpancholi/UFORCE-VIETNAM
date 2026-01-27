@@ -77,8 +77,8 @@ public class ShooterTuningOp2 extends OpMode {
                 true
         );
         if (gamepad1.a) {
-            intake.Intake1On();
-            intake.Intake2On();
+            intake.intake1On();
+            intake.intake2On();
         }
         if (gamepad1.y) {
             turret.resetTurretEncoder();

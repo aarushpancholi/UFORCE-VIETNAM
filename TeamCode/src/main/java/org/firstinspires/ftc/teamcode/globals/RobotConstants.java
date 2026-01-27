@@ -38,6 +38,8 @@ public class RobotConstants {
     public static final int RED_GOAL_TAG_ID = 24;
     public static final int BLUE_GOAL_TAG_ID = 20;
 
+    public static String chosenAlliance = "RED";
+
 
 
 }

@@ -71,10 +71,24 @@ public class TurretTeleopTestV1 extends OpMode {
             turret.resetTurretEncoder();
         }
 
-        if (gamepad1.right_bumper) {
-            turret.setAutoAim(true);
-        }
+//        if (gamepad1.right_bumper) {
+//            turret.setAutoAim(true);
+//        }
         intake.testSensors();
+        if (gamepad1.right_trigger > 0.1) {
+            intake.autoIntake();
+        } else {
+            intake.intakeOff();
+            intake.intake2Off();
+        }
+
+        if (intake.areAllBallsDetected()) {
+            gamepad1.rumble(200);
+        }
+
+        if (gamepad1.right_bumper) {
+            intake.intakeReset();
+        }
 
         turret.periodic();
 

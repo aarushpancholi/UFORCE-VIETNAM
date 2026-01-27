@@ -37,21 +37,23 @@ public class Intake extends SubsystemBase {
     // - Set threshold between them (average is a good start)
     //
     // If you discover voltage goes DOWN when ball is present, flip the comparisons (see NOTE below).
-    private static final double S1_DETECT_V = 1.20;  // placeholder
-    private static final double S2_DETECT_V = 1.20;  // placeholder
-    private static final double S3_DETECT_V = 1.20;  // placeholder
+    private static final double S1_DETECT_V = 0.18;  // placeholder
+    private static final double S2_DETECT_V = 0.18;  // placeholder
+    private static final double S3_DETECT_V = 0.18;  // placeholder
 
     // Hysteresis band (reduces flicker at threshold)
     private static final double HYST_V = 0.05;
 
     // If true: "detected" means voltage >= threshold (common)
     // If false: "detected" means voltage <= threshold (some sensors behave like this)
-    private static final boolean DETECT_IS_HIGHER_V = true;
+    private static final boolean DETECT_IS_HIGHER_V = false;
 
     // Latched states (memory) for hysteresis
     private boolean s1Detected = false;
     private boolean s2Detected = false;
     private boolean s3Detected = false;
+
+    private boolean all3 = false;
 
     public Intake(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
 
@@ -87,6 +89,10 @@ public class Intake extends SubsystemBase {
         stopper.set(pos);
     }
 
+    public double getStopper() {
+        return stopper.get();
+    }
+
     public void intakeOff() {
         intakeMotor.setPower(0.0);
         servoA.setPower(0.0);
@@ -100,6 +106,12 @@ public class Intake extends SubsystemBase {
     public void intake2On() {
         servoA.setPower(1.0);
         servoB.setPower(1.0);
+    }
+
+
+    public void intake2Off() {
+        servoA.setPower(0.0);
+        servoB.setPower(0.0);
     }
 
     // ------------------------------
@@ -129,21 +141,15 @@ public class Intake extends SubsystemBase {
     // Public detection API (same logic as your digital version)
     // ------------------------------
     public boolean isBallDetected01() {
-        double v = s1.getVoltage();
-        s1Detected = computeDetected(v, S1_DETECT_V, s1Detected);
-        return s1Detected;
+        return ((s1.getVoltage()*32.50930976)-2.695384202) < 3.5;
     }
 
     public boolean isBallDetected02() {
-        double v = s2.getVoltage();
-        s2Detected = computeDetected(v, S2_DETECT_V, s2Detected);
-        return s2Detected;
+        return ((s2.getVoltage()*32.50930976)-2.695384202) < 3.5;
     }
 
     public boolean isBallDetected03() {
-        double v = s3.getVoltage();
-        s3Detected = computeDetected(v, S3_DETECT_V, s3Detected);
-        return s3Detected;
+        return ((s3.getVoltage()*32.50930976)-2.695384202) < 3.5;
     }
 
     public boolean areAllBallsDetected() {
@@ -166,17 +172,21 @@ public class Intake extends SubsystemBase {
         boolean d2 = isBallDetected02();
         boolean d3 = isBallDetected03();
 
-        telemetry.addData("Mode", "Ranger 15° FOV (Analog)");
-        telemetry.addData("Detect higher V?", DETECT_IS_HIGHER_V);
+//        telemetry.addData("Mode", "Ranger 15° FOV (Analog)");
+//        telemetry.addData("Detect higher V?", DETECT_IS_HIGHER_V);
+//
+//        telemetry.addData("S1 V", v1);
+//        telemetry.addData("S1 Det", d1 ? 1 : 0);
+//
+//        telemetry.addData("S2 V", v2);
+//        telemetry.addData("S2 Det", d2 ? 1 : 0);
+//
+//        telemetry.addData("S3 V", v3);
+//        telemetry.addData("S3 Det", d3 ? 1 : 0);
 
-        telemetry.addData("S1 V", v1);
-        telemetry.addData("S1 Det", d1 ? 1 : 0);
-
-        telemetry.addData("S2 V", v2);
-        telemetry.addData("S2 Det", d2 ? 1 : 0);
-
-        telemetry.addData("S3 V", v3);
-        telemetry.addData("S3 Det", d3 ? 1 : 0);
+        telemetry.addData("S1", d1);
+        telemetry.addData("S2", d2);
+        telemetry.addData("S3", d3);
 
         telemetry.update();
     }
@@ -199,25 +209,32 @@ public class Intake extends SubsystemBase {
     // ------------------------------
     // Auto intake logic (same as your original)
     // ------------------------------
+
+    public void intakeReset() {
+        all3 = false;
+    }
     public void autoIntake() {
+        if (!all3) {
 
-        // If all 3 slots are full, stop everything
-        if (areAllBallsDetected()) {
-            intakeOff();
-            return;
+            // If all 3 slots are full, stop everything
+            if (areAllBallsDetected()) {
+                intakeOff();
+                all3 = true;
+                return;
+            }
+
+            // If slot 3 is occupied, disable Intake2 (CRServos), but Intake1 can keep running
+            if (isBallDetected03()) {
+                intakeMotor.setPower(1.0);   // Intake1 ON
+                servoA.setPower(0.0);        // Intake2 OFF
+                servoB.setPower(0.0);        // Intake2 OFF
+                return;
+            }
+
+            // Otherwise, run both intakes to collect balls
+            intakeMotor.setPower(1.0);       // Intake1 ON
+            servoA.setPower(1.0);            // Intake2 ON
+            servoB.setPower(1.0);
         }
-
-        // If slot 3 is occupied, disable Intake2 (CRServos), but Intake1 can keep running
-        if (isBallDetected03()) {
-            intakeMotor.setPower(1.0);   // Intake1 ON
-            servoA.setPower(0.0);        // Intake2 OFF
-            servoB.setPower(0.0);        // Intake2 OFF
-            return;
-        }
-
-        // Otherwise, run both intakes to collect balls
-        intakeMotor.setPower(1.0);       // Intake1 ON
-        servoA.setPower(1.0);            // Intake2 ON
-        servoB.setPower(1.0);            // Intake2 ON
     }
 }

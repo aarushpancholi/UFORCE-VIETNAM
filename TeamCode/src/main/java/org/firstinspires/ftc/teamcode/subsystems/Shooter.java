@@ -76,8 +76,8 @@ public class Shooter extends SubsystemBase {
     }
 
     // Use the documented MotorEx velocity getter. getVelocity() is ticks/sec by default. :contentReference[oaicite:3]{index=3}
-    public double getVelA() { return sh.getVelocity(); }
-    public double getVelB() { return sh2.getVelocity(); }
+    public int getVelA() { return (int) sh.getVelocity(); }
+    public int getVelB() { return (int) sh2.getVelocity(); }
 
 
     public static double speedFromDistance(double d) {
@@ -88,20 +88,20 @@ public class Shooter extends SubsystemBase {
             return (int) 7.70289*d+740.79915;
         }
         else if (d>=70) {
-            return (int) (0.0663458*(Math.pow(d, 2)))-(8.79579*d)+(1673.82027);
+            return (int) (0.00122932*(Math.pow(d, 3)))-(0.318188*(Math.pow(d, 2)))+(30.10425*d+403.64484);
         }
         return 0;
     }
 
     public static double angleFromDistance(double d) {
         if (d > 0 && d < 47.8) {
-            return 0.67;
-        }
-        else if (d>=47.8 && d < 70) {
             return 0.62;
         }
+        else if (d>=47.8 && d < 70) {
+            return 0.54;
+        }
         else if (d>=70) {
-            return 0.42;
+            return 0.4;
         }
         return 0.6;
     }

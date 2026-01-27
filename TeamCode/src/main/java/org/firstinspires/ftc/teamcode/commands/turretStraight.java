@@ -3,14 +3,14 @@ package org.firstinspires.ftc.teamcode.commands;
 import com.seattlesolvers.solverslib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
-public class shooterAutoAim extends CommandBase {
+public class turretStraight extends CommandBase {
 
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-    private final Turret turretSubsytem;
+    private final Turret turretSubsystem;
 
 
-    public shooterAutoAim(Turret subsystem) {
-        turretSubsytem = subsystem;
+    public turretStraight(Turret subsystem) {
+        turretSubsystem = subsystem;
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(subsystem);
     }
@@ -18,11 +18,11 @@ public class shooterAutoAim extends CommandBase {
     @Override
     public void initialize() {
         //turn outtake on
-        turretSubsytem.setAutoAim(true);
+        turretSubsystem.straight();
     }
 
     @Override
     public boolean isFinished() {
-        return turretSubsytem.autoAimEnabled;
+        return turretSubsystem.isStraight();
     }
 }

@@ -18,7 +18,7 @@ public class intakeOn1Command extends CommandBase {
     @Override
     public void initialize() {
         //turn outtake on
-        intakeSubsystem.Intake1On();
+        intakeSubsystem.intake1On();
     }
 
     @Override

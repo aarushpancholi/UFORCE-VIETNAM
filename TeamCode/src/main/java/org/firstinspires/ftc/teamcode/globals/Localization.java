@@ -69,8 +69,16 @@ public class Localization {
         return follower.getPose().distanceFrom(redGoalPose);
     }
 
+    public static double getRedDistance(Pose loc) {
+        return loc.distanceFrom(redGoalPose);
+    }
+
     public static double getBlueDistance() {
         return follower.getPose().distanceFrom(blueGoalPose);
+    }
+
+    public static double getBlueDistance(Pose loc) {
+        return loc.distanceFrom(blueGoalPose);
     }
 
     public static double getBlueHeadingDiff(double turretAbsHeading) {
