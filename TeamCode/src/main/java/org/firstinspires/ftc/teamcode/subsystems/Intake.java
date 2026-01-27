@@ -1,85 +1,149 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.telemetry.TelemetryManager;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 
 public class Intake extends SubsystemBase {
-    private final DigitalChannel sensor01;
-    private final DigitalChannel sensor02;
-    private final DigitalChannel sensor03;
 
-    private final DcMotorEx IntakeMotor;
-    private final CRServo ServoMotor1;
-    private final CRServo ServoMotor2;
+    // ------------------------------
+    // Ranger in 15° FOV mode = ANALOG VOLTAGE
+    // ------------------------------
+    private final AnalogInput s1;
+    private final AnalogInput s2;
+    private final AnalogInput s3;
+
+    // ------------------------------
+    // Hardware
+    // ------------------------------
+    private final DcMotorEx intakeMotor;
+    private final CRServo servoA;
+    private final CRServo servoB;
     private final ServoEx stopper;
 
-    private TelemetryManager telemetry;
+    private final TelemetryManager telemetry;
+
+    // ------------------------------
+    // TUNING (YOU MUST CALIBRATE)
+    // ------------------------------
+    // Pick these from telemetry:
+    // - Measure voltage with NO ball (V_empty)
+    // - Measure voltage with ball present (V_ball)
+    // - Set threshold between them (average is a good start)
+    //
+    // If you discover voltage goes DOWN when ball is present, flip the comparisons (see NOTE below).
+    private static final double S1_DETECT_V = 1.20;  // placeholder
+    private static final double S2_DETECT_V = 1.20;  // placeholder
+    private static final double S3_DETECT_V = 1.20;  // placeholder
+
+    // Hysteresis band (reduces flicker at threshold)
+    private static final double HYST_V = 0.05;
+
+    // If true: "detected" means voltage >= threshold (common)
+    // If false: "detected" means voltage <= threshold (some sensors behave like this)
+    private static final boolean DETECT_IS_HIGHER_V = true;
+
+    // Latched states (memory) for hysteresis
+    private boolean s1Detected = false;
+    private boolean s2Detected = false;
+    private boolean s3Detected = false;
 
     public Intake(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
-        sensor01 = hardwareMap.get(DigitalChannel.class, "s1");
-        sensor01.setMode(DigitalChannel.Mode.INPUT);
 
-        sensor02 = hardwareMap.get(DigitalChannel.class, "s2");
-        sensor02.setMode(DigitalChannel.Mode.INPUT);
+        // Analog inputs (make sure Ranger analog out is plugged into REV ANALOG ports)
+        s1 = hardwareMap.get(AnalogInput.class, "s1");
+        s2 = hardwareMap.get(AnalogInput.class, "s2");
+        s3 = hardwareMap.get(AnalogInput.class, "s3");
 
-        sensor03 = hardwareMap.get(DigitalChannel.class, "s3");
-        sensor03.setMode(DigitalChannel.Mode.INPUT);
-
-        IntakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
-        IntakeMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        intakeMotor = hardwareMap.get(DcMotorEx.class, "intake");
+        intakeMotor.setDirection(DcMotorEx.Direction.REVERSE);
 
         stopper = new ServoEx(hardwareMap, "stopper");
 
-        ServoMotor1 = hardwareMap.get(CRServo.class, "sA");
-        ServoMotor2 = hardwareMap.get(CRServo.class, "sB");
+        servoA = hardwareMap.get(CRServo.class, "sA");
+        servoB = hardwareMap.get(CRServo.class, "sB");
 
-        ServoMotor1.setDirection(DcMotorSimple.Direction.FORWARD);
-        ServoMotor2.setDirection(DcMotorSimple.Direction.REVERSE);
-
-
+        servoA.setDirection(DcMotorSimple.Direction.FORWARD);
+        servoB.setDirection(DcMotorSimple.Direction.REVERSE);
 
         telemetry = telemetryManager;
     }
 
     @Override
     public void periodic() {
-
+        // Optional: you could call testSensors() here if you want constant telemetry,
+        // but it may spam. Usually call it from your OpMode loop.
     }
 
+    // ------------------------------
+    // Actuators
+    // ------------------------------
     public void setStopper(double pos) {
         stopper.set(pos);
     }
 
-    public void intakeOff(){
-        IntakeMotor.setPower(0.0);
-        ServoMotor1.setPower(0.0);
-        ServoMotor2.setPower(0.0);
+    public void intakeOff() {
+        intakeMotor.setPower(0.0);
+        servoA.setPower(0.0);
+        servoB.setPower(0.0);
     }
 
-    public void Intake1On(){
-        IntakeMotor.setPower(1.0);
+    public void intake1On() {
+        intakeMotor.setPower(1.0);
     }
 
-    public void Intake2On(){
-        ServoMotor1.setPower(1.0);
-        ServoMotor2.setPower(1.0);
+    public void intake2On() {
+        servoA.setPower(1.0);
+        servoB.setPower(1.0);
     }
+
+    // ------------------------------
+    // Detection helpers (voltage -> boolean) with hysteresis
+    // ------------------------------
+    private boolean detectWithHysteresisHigherIsDetected(double v, double threshold, boolean prevState) {
+        // ON when v >= threshold + HYST
+        // OFF when v <  threshold - HYST
+        if (prevState) return v >= (threshold - HYST_V);
+        return v >= (threshold + HYST_V);
+    }
+
+    private boolean detectWithHysteresisLowerIsDetected(double v, double threshold, boolean prevState) {
+        // ON when v <= threshold - HYST
+        // OFF when v >  threshold + HYST
+        if (prevState) return v <= (threshold + HYST_V);
+        return v <= (threshold - HYST_V);
+    }
+
+    private boolean computeDetected(double v, double threshold, boolean prevState) {
+        return DETECT_IS_HIGHER_V
+                ? detectWithHysteresisHigherIsDetected(v, threshold, prevState)
+                : detectWithHysteresisLowerIsDetected(v, threshold, prevState);
+    }
+
+    // ------------------------------
+    // Public detection API (same logic as your digital version)
+    // ------------------------------
     public boolean isBallDetected01() {
-        return sensor01.getState();
+        double v = s1.getVoltage();
+        s1Detected = computeDetected(v, S1_DETECT_V, s1Detected);
+        return s1Detected;
     }
 
     public boolean isBallDetected02() {
-        return sensor02.getState();
+        double v = s2.getVoltage();
+        s2Detected = computeDetected(v, S2_DETECT_V, s2Detected);
+        return s2Detected;
     }
 
     public boolean isBallDetected03() {
-        return sensor03.getState();
+        double v = s3.getVoltage();
+        s3Detected = computeDetected(v, S3_DETECT_V, s3Detected);
+        return s3Detected;
     }
 
     public boolean areAllBallsDetected() {
@@ -90,31 +154,53 @@ public class Intake extends SubsystemBase {
         return !areAllBallsDetected();
     }
 
+    // ------------------------------
+    // Telemetry / Debug
+    // ------------------------------
     public void testSensors() {
-        int status01 = isBallDetected01() ? 1 : 0;
-        int status02 = isBallDetected02() ? 1 : 0;
-        int status03 = isBallDetected03() ? 1 : 0;
+        double v1 = s1.getVoltage();
+        double v2 = s2.getVoltage();
+        double v3 = s3.getVoltage();
 
-        telemetry.addData("Sensor 01 mde: ", sensor01.getMode());
-        telemetry.addData("Sensor 01: ", sensor01.getState());
-        telemetry.addData("Sensor 02: ", status02);
-        telemetry.addData("Sensor 03: ", status03);
+        boolean d1 = isBallDetected01();
+        boolean d2 = isBallDetected02();
+        boolean d3 = isBallDetected03();
+
+        telemetry.addData("Mode", "Ranger 15° FOV (Analog)");
+        telemetry.addData("Detect higher V?", DETECT_IS_HIGHER_V);
+
+        telemetry.addData("S1 V", v1);
+        telemetry.addData("S1 Det", d1 ? 1 : 0);
+
+        telemetry.addData("S2 V", v2);
+        telemetry.addData("S2 Det", d2 ? 1 : 0);
+
+        telemetry.addData("S3 V", v3);
+        telemetry.addData("S3 Det", d3 ? 1 : 0);
+
         telemetry.update();
     }
 
+    // ------------------------------
+    // Intake status helpers
+    // ------------------------------
     public boolean isIntake1On() {
-        return IntakeMotor.getPower() > 0.9;
+        return intakeMotor.getPower() > 0.9;
     }
 
     public boolean isIntake2On() {
-        return ServoMotor1.getPower() > 0.9;
+        return servoA.getPower() > 0.9; // assumes both are driven the same
     }
 
     public boolean isIntakeOff() {
-        return IntakeMotor.getPower() < 0.1;
+        return intakeMotor.getPower() < 0.1 && Math.abs(servoA.getPower()) < 0.1 && Math.abs(servoB.getPower()) < 0.1;
     }
 
+    // ------------------------------
+    // Auto intake logic (same as your original)
+    // ------------------------------
     public void autoIntake() {
+
         // If all 3 slots are full, stop everything
         if (areAllBallsDetected()) {
             intakeOff();
@@ -123,16 +209,15 @@ public class Intake extends SubsystemBase {
 
         // If slot 3 is occupied, disable Intake2 (CRServos), but Intake1 can keep running
         if (isBallDetected03()) {
-            IntakeMotor.setPower(1.0);     // Intake1 ON
-            ServoMotor1.setPower(0.0);     // Intake2 OFF
-            ServoMotor2.setPower(0.0);     // Intake2 OFF
+            intakeMotor.setPower(1.0);   // Intake1 ON
+            servoA.setPower(0.0);        // Intake2 OFF
+            servoB.setPower(0.0);        // Intake2 OFF
             return;
         }
 
-        // Otherwise, we can run both intakes to collect balls
-        IntakeMotor.setPower(1.0);         // Intake1 ON
-        ServoMotor1.setPower(1.0);         // Intake2 ON
-        ServoMotor2.setPower(1.0);         // Intake 2 ON
+        // Otherwise, run both intakes to collect balls
+        intakeMotor.setPower(1.0);       // Intake1 ON
+        servoA.setPower(1.0);            // Intake2 ON
+        servoB.setPower(1.0);            // Intake2 ON
     }
-
 }
