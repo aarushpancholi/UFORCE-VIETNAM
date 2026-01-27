@@ -22,11 +22,9 @@ public class transfer extends CommandBase {
     public void initialize() {
         if (on) {
             intakeSubsystem.setStopper(0.4);
-            intakeSubsystem.intake2On();
         }
         else {
             intakeSubsystem.setStopper(0.6);
-            intakeSubsystem.intake2Off();
         }
     }
 

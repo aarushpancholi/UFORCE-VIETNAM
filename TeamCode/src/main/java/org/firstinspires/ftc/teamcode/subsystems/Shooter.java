@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.firstinspires.ftc.teamcode.globals.Localization.getRedDistance;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.maxEPT;
 
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -24,6 +25,8 @@ public class Shooter extends SubsystemBase {
 
     private PIDFController controller1, controller2;
     private TelemetryManager telemetry;
+    private boolean autoShoot = true;
+    private double pos = 0.5;
     private DcMotorEx sh;
     private DcMotorEx sh2;
     private ServoEx hood;
@@ -48,6 +51,11 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (autoShoot) {
+            targetVelocity = speedFromDistance(getRedDistance());
+            pos = angleFromDistance(getRedDistance());
+            setHood(pos);
+        }
         telemetry.addData("TargetVel", targetVelocity);
         telemetry.addData("CurrentVel1", velocity1);
         telemetry.addData("CurrentVel2", velocity2);
@@ -60,6 +68,10 @@ public class Shooter extends SubsystemBase {
         sh.setPower(controller1.calculate(targetVelocity - velocity1, targetVelocity, 0.0));
         sh2.setPower(controller2.calculate(targetVelocity - velocity2, targetVelocity, 0.0));
         telemetry.update();
+    }
+
+    public void setAutoShoot(boolean on) {
+        autoShoot = on;
     }
 
     public void setTargetEPT(double ept) {

@@ -103,6 +103,13 @@ public class Intake extends SubsystemBase {
         intakeMotor.setPower(1.0);
     }
 
+    public void intakeOpposite() {
+        intakeMotor.setPower(-1.0);
+        servoA.setPower(-1.0);
+        servoB.setPower(-1.0);
+
+    }
+
     public void intake2On() {
         servoA.setPower(1.0);
         servoB.setPower(1.0);
