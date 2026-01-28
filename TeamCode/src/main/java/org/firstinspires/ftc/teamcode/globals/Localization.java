@@ -49,6 +49,23 @@ public class Localization {
         lastHeading = h;
     }
 
+    public static void updateNoFollower() {
+        double dt = timer.seconds();
+        timer.reset();
+
+        double h = follower.getHeading();
+        telemetry.addData("dt", dt);
+
+        if (dt > 1e-3) {
+            double dh = AngleUnit.normalizeRadians(h - lastHeading);
+            double rawVel = dh / dt;
+            headingVel = (1.0 - VEL_ALPHA) * headingVel + VEL_ALPHA * rawVel;
+            telemetry.addData("dh", dh);
+        }
+
+        lastHeading = h;
+    }
+
     public static double getHeading() {
         return follower.getHeading();
     }

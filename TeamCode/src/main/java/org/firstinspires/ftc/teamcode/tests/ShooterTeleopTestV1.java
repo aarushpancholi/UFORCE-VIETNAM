@@ -70,18 +70,7 @@ public class ShooterTeleopTestV1 extends OpMode {
             intake.setStopper(0.6);
             intake.intake1On();
         }
-//        if (gamepad1.left_trigger > 0.1) {
-//            intake.Intake2On();
-//            intake.setStopper(0.0);
-//        } else {
-//            intake.intakeOff();
-//            intake.setStopper(1.0);
-//            intake.Intake1On();
-//        }
-//        if (gamepad1.dpad_up) {
-//            intake.Intake2On();
-//            intake.setStopper(0.0);
-//        }
+
         if (gamepad1.y) {
             intake.intakeOff();
         }
@@ -111,22 +100,10 @@ public class ShooterTeleopTestV1 extends OpMode {
             intake.intake1On();
         }
 
-//        if (gamepad1.dpadUpWasReleased()) {
-//            speed += 100;
-//        }
-//        if (gamepad1.dpadDownWasReleased()) {
-//            speed -= 100;
-//        }
-//        if (gamepad1.dpadUpWasReleased()) {
-//            speed += 200;
-//        }
-//        if (gamepad1.dpadDownWasReleased()) {
-//            speed -= 200;
-//        }
+
         shooter.setTargetEPT(speedFromDistance(getRedDistance()));
         shooter.setHood(angleFromDistance(getRedDistance()));
 
-//        telemetry.addData("encoder", turret.getPos());
         shooter.periodic();
 
         telemetry.update();
