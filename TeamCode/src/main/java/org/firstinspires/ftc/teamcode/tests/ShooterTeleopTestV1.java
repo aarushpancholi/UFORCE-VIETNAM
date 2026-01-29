@@ -44,7 +44,7 @@ public class ShooterTeleopTestV1 extends OpMode {
         shooter = new Shooter(hardwareMap, telemetry);
         turret = new Turret(hardwareMap, telemetry);
         follower = createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(135,9,Math.toRadians(90)));
+        follower.setStartingPose(new Pose(79.76,9,Math.toRadians(90)));
         intake = new Intake(hardwareMap, telemetry);
         Localization.init(follower, telemetry);
 
@@ -64,10 +64,10 @@ public class ShooterTeleopTestV1 extends OpMode {
         telemetry.addData("encoder", turret.getPos());
         if (gamepad1.right_trigger > 0.1) {
             intake.intake2On();
-            intake.setStopper(0.4);
+            intake.setStopper(0.3);
         } else {
             intake.intakeOff();
-            intake.setStopper(0.6);
+            intake.setStopper(0.45);
             intake.intake1On();
         }
 

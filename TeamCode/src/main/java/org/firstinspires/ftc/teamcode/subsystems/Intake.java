@@ -23,6 +23,7 @@ public class Intake extends SubsystemBase {
     // ------------------------------
     private final DcMotorEx intakeMotor;
     private final CRServo servoA;
+
     private final CRServo servoB;
     private final ServoEx stopper;
 
@@ -70,8 +71,11 @@ public class Intake extends SubsystemBase {
         servoA = hardwareMap.get(CRServo.class, "sA");
         servoB = hardwareMap.get(CRServo.class, "sB");
 
+
         servoA.setDirection(DcMotorSimple.Direction.FORWARD);
-        servoB.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        servoB.setDirection(DcMotorSimple.Direction.FORWARD
+        );
 
         telemetry = telemetryManager;
     }
@@ -95,8 +99,8 @@ public class Intake extends SubsystemBase {
 
     public void intakeOff() {
         intakeMotor.setPower(0.0);
-        servoA.setPower(0.0);
-        servoB.setPower(0.0);
+//        servoA.setPower(0.0);
+//        servoB.setPower(0.0);
     }
 
     public void intake1On() {
@@ -105,20 +109,23 @@ public class Intake extends SubsystemBase {
 
     public void intakeOpposite() {
         intakeMotor.setPower(-1.0);
-        servoA.setPower(-1.0);
-        servoB.setPower(-1.0);
+//        servoA.setPower(-1.0);
+//        servoB.setPower(-1.0);
 
     }
 
     public void intake2On() {
-        servoA.setPower(1.0);
-        servoB.setPower(1.0);
+//        servoA.setPower(1.0);
+//        servoB.setPower(1.0);
+        intakeMotor.setPower(1);
+
     }
 
 
     public void intake2Off() {
-        servoA.setPower(0.0);
-        servoB.setPower(0.0);
+//        servoA.setPower(0.0);
+//        servoB.setPower(0.0);
+//        intakeMotor.setPower(1.0);
     }
 
     // ------------------------------
@@ -163,6 +170,10 @@ public class Intake extends SubsystemBase {
         return isBallDetected01() && isBallDetected02() && isBallDetected03();
     }
 
+    public boolean noBalls() {
+        return !isBallDetected01() && !isBallDetected02() && !isBallDetected03();
+    }
+
     public boolean canIntake() {
         return !areAllBallsDetected();
     }
@@ -202,15 +213,16 @@ public class Intake extends SubsystemBase {
     // Intake status helpers
     // ------------------------------
     public boolean isIntake1On() {
-        return intakeMotor.getPower() > 0.9;
+        return intakeMotor.getPower() > 0.4;
     }
 
     public boolean isIntake2On() {
-        return servoA.getPower() > 0.9; // assumes both are driven the same
+        return intakeMotor.getPower() > 0.4; // assumes both are driven the same
     }
 
     public boolean isIntakeOff() {
-        return intakeMotor.getPower() < 0.1 && Math.abs(servoA.getPower()) < 0.1 && Math.abs(servoB.getPower()) < 0.1;
+//        return intakeMotor.getPower() < 0.1 && Math.abs(servoA.getPower()) < 0.1 && Math.abs(servoB.getPower()) < 0.1;
+        return intakeMotor.getPower() < 0.1;
     }
 
     // ------------------------------

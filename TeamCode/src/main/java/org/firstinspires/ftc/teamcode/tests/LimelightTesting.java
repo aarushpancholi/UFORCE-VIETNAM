@@ -22,7 +22,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Localization;
 import org.firstinspires.ftc.teamcode.globals.RobotConstants;
-import org.firstinspires.ftc.teamcode.subsystems.IntakeTest;
+import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 import org.firstinspires.ftc.teamcode.vision.AprilTagTracking;
@@ -34,12 +34,14 @@ import java.util.List;
 public class LimelightTesting extends OpMode {
 
     private TelemetryManager telemetry;
+    private Intake intake;
     private AprilTagTracking vision;
 
     @Override
     public void init() {
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         vision = new AprilTagTracking(hardwareMap);
+        intake = new Intake(hardwareMap, telemetry);
 
 
         telemetry.addLine("Initialized");
@@ -54,6 +56,7 @@ public class LimelightTesting extends OpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
+        intake.intake2On();
         telemetry.addData("limelight", vision.getYawErrorRadToGoal("red"));
         telemetry.update();
     }

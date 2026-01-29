@@ -25,7 +25,7 @@ public class Shooter extends SubsystemBase {
 
     private PIDFController controller1, controller2;
     private TelemetryManager telemetry;
-    private boolean autoShoot = true;
+    private boolean autoShoot = false;
     private double pos = 0.5;
     private DcMotorEx sh;
     private DcMotorEx sh2;
@@ -107,10 +107,10 @@ public class Shooter extends SubsystemBase {
 
     public static double angleFromDistance(double d) {
         if (d > 0 && d < 47.8) {
-            return 0.62;
+            return 0.63;
         }
         else if (d>=47.8 && d < 70) {
-            return 0.54;
+            return 0.6;
         }
         else if (d>=70) {
             return 0.4;

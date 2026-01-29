@@ -45,14 +45,14 @@ public class Auto12PointsSubsystemsV3 extends CommandOpMode {
     TelemetryManager telemetryM;
 
     // === New points (poses) ===
-    private final Pose startPose = new Pose(81.291, 9.170, Math.toRadians(90));
+    private final Pose startPose = new Pose(81.291, 0, Math.toRadians(90));
 
     // Path1: (start) -> cp -> end
     private final Pose p1CP  = new Pose(81.075, 37.865);
     private final Pose p1End = new Pose(131.874, 35.708, H0);
 
     // Path2: line end1 -> p2End
-    private final Pose p2End = new Pose(81.484, 27.228, H0);
+    private final Pose p2End = new Pose(85.5228426395939, 27.228, H0);
 
     // Path3: (p2End) -> cp -> end
     private final Pose p3CP  = new Pose(79.027, 63.663);
@@ -60,17 +60,17 @@ public class Auto12PointsSubsystemsV3 extends CommandOpMode {
 
     // Path4: (p3End) -> cp -> end
     private final Pose p4CP  = new Pose(93.241, 58.012);
-    private final Pose p4End = new Pose(82.334, 71.180, H0);
+    private final Pose p4End = new Pose(85.5228426395939, 71.180, H0);
 
     // Path5: (p4End) -> cp -> end
     private final Pose p5CP  = new Pose(94.193, 84.650);
     private final Pose p5End = new Pose(127.502, 83.553, H0);
 
     // Path6: line p5End -> p6End (heading 0 -> 45)
-    private final Pose p6End = new Pose(84.095, 83.588, H45);
+    private final Pose p6End = new Pose(85.5228426395939, 83.588, H45);
 
     // Path7: line p6End -> p7End (tangent heading)
-    private final Pose p7End = new Pose(84.185, 58.001);
+    private final Pose p7End = new Pose(85.5228426395939, 58.001);
 
     // PathChains
     private PathChain path1, path2, path3, path4, path5, path6, path7;
@@ -156,9 +156,11 @@ public class Auto12PointsSubsystemsV3 extends CommandOpMode {
 
         // Keep your command scheduling here (unchanged). Paths are now updated.
         SequentialCommandGroup autonomousSequence = new SequentialCommandGroup(
-                new turretAutoAim(turret, true),
-                new intakeOn1Command(intake),
-                new setShooter(shooter, (int) speedFromDistance(getRedDistance(startPose)), angleFromDistance(getRedDistance(startPose))),
+                new ParallelCommandGroup(
+                        new turretAutoAim(turret, true),
+                        new intakeOn1Command(intake),
+                        new setShooter(shooter, (int) speedFromDistance(getRedDistance(startPose)), angleFromDistance(getRedDistance(startPose)))
+                ),
 //                new setShooter(shooter, (int) speedFromDistance(getRedDistance()), angleFromDistance(getRedDistance())),
                 new transfer(intake, true),
                 new WaitCommand(3000),
@@ -211,7 +213,7 @@ public class Auto12PointsSubsystemsV3 extends CommandOpMode {
     @Override
     public void run() {
         super.run();
-        Localization.update();
+        Localization.update(); // updates follower + extra calculations for heading velocity
 
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());

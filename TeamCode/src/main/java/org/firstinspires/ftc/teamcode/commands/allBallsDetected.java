@@ -1,41 +1,26 @@
 package org.firstinspires.ftc.teamcode.commands;
 
 import com.seattlesolvers.solverslib.command.CommandBase;
-
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 
-public class transfer extends CommandBase {
-    boolean on = false;
+public class allBallsDetected extends CommandBase {
 
     @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
     private final Intake intakeSubsystem;
 
 
-    public transfer(Intake subsystem, boolean on) {
+    public allBallsDetected(Intake subsystem) {
         intakeSubsystem = subsystem;
-        this.on = on;
         // Use addRequirements() here to declare subsystem dependencies.
         addRequirements(subsystem);
     }
 
     @Override
     public void initialize() {
-        if (on) {
-            intakeSubsystem.setStopper(0.35);
-        }
-        else {
-            intakeSubsystem.setStopper(0.45);
-        }
     }
 
     @Override
     public boolean isFinished() {
-        if (on) {
-            return (intakeSubsystem.getStopper() == 0.35);
-        }
-        else {
-            return (intakeSubsystem.getStopper() == 0.45);
-        }
-
+        return intakeSubsystem.areAllBallsDetected();
     }
 }

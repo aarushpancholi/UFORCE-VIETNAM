@@ -30,6 +30,6 @@ public class setShooter extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return (target - 5 <= shooterSubsystem.getVelA() && shooterSubsystem.getVelA() <= target + 5);
+        return (target - 10 <= shooterSubsystem.getVelA()) && (shooterSubsystem.getVelA() <= target+10);
     }
 }

@@ -68,6 +68,8 @@ public class TeleopMain extends CommandOpMode {
         follower.startTeleOpDrive(true);
         intake = new Intake(hardwareMap, telemetry);
         Localization.init(follower, telemetry);
+        turret.resetTurretEncoder();
+        intake.setStopper(0.45);
         turret.setAutoAim(true);
 
         super.register(turret);
@@ -89,28 +91,31 @@ public class TeleopMain extends CommandOpMode {
                                         .build())
                         )
                 .whenReleased(
-                        new InstantCommand(() -> follower.startTeleOpDrive(true))
+                            new InstantCommand(() -> follower.startTeleOpDrive(true) )
+
                 );
 
         driverOp.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whileHeld(
-                        new SequentialCommandGroup(
                         new FollowPathCommand(follower, follower.pathBuilder()
                                 .addPath(new BezierLine(
                                         follower.getPose(),
                                         redPark
                                 ))
                                 .setLinearHeadingInterpolation(follower.getHeading(), redPark.getHeading())
-                                .build()),
-                                new InstantCommand(() -> follower.startTeleOpDrive(true))
-                        )
-                );
+                                .build())
+                )
+                        .whenReleased(
+                                new InstantCommand(() -> follower.startTeleOpDrive(true) )
+                        );
 
         driverOp.getGamepadButton(GamepadKeys.Button.A)
                         .whileHeld(
                                 new InstantCommand(() -> follower.holdPoint(follower.getPose()))
                         ).whenReleased(
-                        new InstantCommand(() -> follower.startTeleOpDrive(true))
+                        new ParallelCommandGroup(
+                                new InstantCommand(() -> follower.startTeleOpDrive(true) )
+                        )
                 );
 
         toolOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
@@ -172,7 +177,7 @@ public class TeleopMain extends CommandOpMode {
             gamepad2.rumble(200);
         }
 
-        sens = (gamepad1.right_trigger > 0.1) ? 2.0 : 1.0;
+        sens = (gamepad1.right_trigger > 0.3) ? 2.0 : 1.0;
         follower.setTeleOpDrive(-gamepad1.left_stick_y/sens, -gamepad1.left_stick_x/sens, -gamepad1.right_stick_x/sens, true);
 
         telemetry.addData("X", follower.getPose().getX());

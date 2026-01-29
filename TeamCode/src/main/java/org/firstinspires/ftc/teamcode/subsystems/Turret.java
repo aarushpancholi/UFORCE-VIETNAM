@@ -37,9 +37,9 @@ public class Turret extends SubsystemBase {
 
     // PIDF (tune these)
     private final PIDFController turretPID = new PIDFController(
-            0.015,  // kP
+            0.02,  // kP
             0.0,    // kI
-            0.001,  // kD
+            0.0015,  // kD
             0.0     // kF
     );
 
@@ -138,14 +138,11 @@ public class Turret extends SubsystemBase {
         double power = turretPID.calculate(current);
         power = Range.clip(power, -maxPower, maxPower);
 
-        // Grinding protection: don't push further into a hard limit
-        int pos = (int) current;
-        boolean atMin = pos <= (minTurretPos + 2);
-        boolean atMax = pos >= (maxTurretPos - 2);
-        if ((atMin && power < 0) || (atMax && power > 0)) {
-            power = 0;
-            turretPID.reset();
+        double err = targetTicks - current;
+        if (Math.abs(err) > TICKS_TOLERANCE && Math.abs(power) < 0.15) {
+            power = Math.copySign(0.15, power);
         }
+
 
         turret.set(power);
     }
