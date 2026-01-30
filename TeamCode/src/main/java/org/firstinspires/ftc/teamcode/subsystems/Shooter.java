@@ -113,24 +113,23 @@ public class Shooter extends SubsystemBase {
                 return 0.63;
             }
             else if (d>=47.8 && d < 70) {
-                return 0.6;
+                return 0.57;
             }
             else if (d>=70) {
                 return 0.4;
             }
-            return 0.6;
         }
         else {
             if (d > 0 && d < 47.8) {
-                return 0.62;
+                return 0.63;
             }
             else if (d>=47.8 && d < 70) {
-                return 0.54;
+                return 0.57;
             }
             else if (d>=70) {
                 return 0.4;
             }
-            return 0.6;
         }
+        return 0.6;
     }
 }

@@ -12,6 +12,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Localization;
@@ -28,6 +29,12 @@ public class TurretTeleopTestV1 extends OpMode {
     private TelemetryManager telemetry;
     private DrivetrainTest drivetrain;
     private Intake intake;
+    public static double kP = 0.0;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+    public static double kF = 0.0002;
+    public static int target = 100;
+
 
     @Override
     public void init() {
@@ -43,6 +50,7 @@ public class TurretTeleopTestV1 extends OpMode {
         follower.setStartingPose(new Pose(140,0,Math.toRadians(90)));
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         intake = new Intake(hardwareMap, telemetry);
+//        turret.resetTurretEncoder();
         Localization.init(follower, telemetry);
 
         telemetry.addLine("Initialized. Press START to enable auto-aim.");
@@ -58,9 +66,13 @@ public class TurretTeleopTestV1 extends OpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
+        turret.setAutoAim(true);
+//        turret.turretPID.setCoefficients(new PIDFCoefficients(kP, kI, kD, kF));
+        turret.setTargetTicks(target);
         // Keep localization fresh
         // (If your PinpointLocalizer uses a different update method name, change this line.)
         telemetry.addData("encoder", turret.getPos());
+        telemetry.addData("target", Turret.targetTicks);
         Localization.update();
         drivetrain.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, 1.0);
 //        follower.setTeleOpDrive(

@@ -32,16 +32,16 @@ public class RobotConstants {
     public static int maxEPT = 1900;
 
     public static Pose blueGoalPose = new Pose(10, 136, Math.toRadians(90));
-    public static Pose redGoalPose  = new Pose(138, 136, Math.toRadians(90));
+    public static Pose redGoalPose  = new Pose(138, 120, Math.toRadians(90));
 
 
     public static final int RED_GOAL_TAG_ID = 24;
     public static final int BLUE_GOAL_TAG_ID = 20;
 
-    public static final Pose resetPos = new Pose(134.798, 0, Math.toRadians(0));
+    public static final Pose resetPos = new Pose(10, 0, Math.toRadians(0));
 
-    public static String chosenAlliance = "RED";
-    public static Pose savedPose = new Pose(79.976, 4,Math.toRadians(90));
+    public static String chosenAlliance = "BLUE";
+    public static Pose savedPose = new Pose(79.976, 9,Math.toRadians(90));
 
     public static Pose intakeBlueRamp = new Pose(12.580710659898466, 59.021319796954295, Math.toRadians(150));
     public static Pose blueRampCP = new Pose(30.68223350253807, 58.12994923857866);

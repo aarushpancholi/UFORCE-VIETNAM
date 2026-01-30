@@ -56,11 +56,11 @@ public class Auto18Points extends CommandOpMode {
     private static final double H45 = Math.toRadians(45);
 
     // --- Poses (from your provided Paths array) ---
-    private final Pose startPose = new Pose(126.026, 116.083, H45);
+    private final Pose startPose = new Pose(125.526, 115.883, H45);
 
     private final Pose p1End  = new Pose(87.431, 89.214);
     private final Pose p2End  = new Pose(104.587, 83.383);
-    private final Pose p3End  = new Pose(128.264, 83.921);
+    private final Pose p3End  = new Pose(130.264, 83.921);
     private final Pose p4End  = new Pose(81.889, 81.420);
     private final Pose p5End  = new Pose(104.886, 59.284);
 
@@ -233,7 +233,7 @@ public class Auto18Points extends CommandOpMode {
 
         SequentialCommandGroup shooterSequence = new SequentialCommandGroup(
                 new WaitCommand(200),
-                new isAimed(turret),
+                new isAimed(turret).withTimeout(400),
                 new transfer(intake, true)
                         .alongWith(new InstantCommand(() -> intake.intake2On())),
                 new WaitCommand(450)

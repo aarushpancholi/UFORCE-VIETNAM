@@ -7,6 +7,7 @@ import static org.firstinspires.ftc.teamcode.globals.RobotConstants.chosenAllian
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.maxTurretPos;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.minTurretPos;
 
+import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
@@ -20,6 +21,7 @@ import org.firstinspires.ftc.teamcode.vision.AprilTagTracking;
 
 import java.util.OptionalDouble;
 
+@Configurable
 public class Turret extends SubsystemBase {
     private final MotorEx turret;
     private final AprilTagTracking vision;
@@ -35,19 +37,19 @@ public class Turret extends SubsystemBase {
 
     // Limelight deadband to prevent oscillation (±1°)
     private static final double VISION_DEADBAND_RAD = Math.toRadians(1.0);
-
+    public static double kP = 0.011;
+    public static double kI = 0.0;
+    public static double kD = 0.0003;
+    public static double kF = 0.0002;
     // PIDF (tune these)
-    private final PIDFController turretPID = new PIDFController(
-            0.021,  // kP
-            0.0,    // kI
-            0.0015,  // kD
-            0.0     // kF
+    public static PIDFController turretPID = new PIDFController(
+            kP, kI, kD, kF
     );
 
-    private static final int TICKS_TOLERANCE = 2;
+    private static final int TICKS_TOLERANCE = 5;
     private double maxPower = 1;
 
-    private int targetTicks = 168;
+    public static int targetTicks = 168;
 
     public Turret(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
         turret = new MotorEx(hardwareMap, "turret");
@@ -111,7 +113,6 @@ public class Turret extends SubsystemBase {
         // Vision-based aim error (camera-space) as +CCW rad
         OptionalDouble visionErrOpt = vision.getYawErrorRadToGoal(chosenAlliance);
 
-        // HARD SWITCH:
         // If tag visible -> use ONLY limelight error (with deadband)
         // Else -> use localization
         double aimErr;
@@ -139,12 +140,12 @@ public class Turret extends SubsystemBase {
         double power = turretPID.calculate(current);
         power = Range.clip(power, -maxPower, maxPower);
 
-        double err = targetTicks - current;
-        if (Math.abs(err) > TICKS_TOLERANCE && Math.abs(power) < 0.15) {
-            power = Math.copySign(0.15, power);
-        }
-
-
+//        double err = targetTicks - current;
+//        if (Math.abs(err) > TICKS_TOLERANCE && Math.abs(power) < 0.2) {
+//            power = Math.copySign(0.2, power);
+//        }
+//
+//
         turret.set(power);
     }
 

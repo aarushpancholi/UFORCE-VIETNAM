@@ -64,12 +64,12 @@ public class RedTeleop extends CommandOpMode {
         shooter = new Shooter(hardwareMap, telemetry, false);
         turret = new Turret(hardwareMap, telemetry);
         follower = createFollower(hardwareMap);
-        follower.setPose(savedPose != null ? savedPose : new Pose(79.976, 4,Math.toRadians(90)));
+        follower.setPose(savedPose != null ? savedPose : new Pose(79.976, 0,Math.toRadians(90)));
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower.startTeleOpDrive(true);
         intake = new Intake(hardwareMap, telemetry);
         Localization.init(follower, telemetry);
-        turret.resetTurretEncoder();
+//        turret.resetTurretEncoder();
         intake.setStopper(0.45);
         shooter.setAutoShoot(true);
         turret.setAutoAim(true);
