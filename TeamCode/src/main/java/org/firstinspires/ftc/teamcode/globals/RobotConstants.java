@@ -6,8 +6,8 @@ import com.seattlesolvers.solverslib.hardware.motors.MotorEx;
 import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 
 public class RobotConstants {
-    public static double maxHoodPos = 0.4;
-    public static double minHoodPos = 0.8;
+    public static double maxHoodPos = 0.45;
+    public static double minHoodPos = 0.75;
 
     public static double maxTurretPos = 336;
     public static double minTurretPos = 0;
@@ -38,11 +38,14 @@ public class RobotConstants {
     public static final int RED_GOAL_TAG_ID = 24;
     public static final int BLUE_GOAL_TAG_ID = 20;
 
+    public static final Pose resetPos = new Pose(134.798, 0, Math.toRadians(0));
+
     public static String chosenAlliance = "RED";
+    public static Pose savedPose = new Pose(79.976, 4,Math.toRadians(90));
 
     public static Pose intakeBlueRamp = new Pose(12.580710659898466, 59.021319796954295, Math.toRadians(150));
     public static Pose blueRampCP = new Pose(30.68223350253807, 58.12994923857866);
-    public static Pose intakeRedRamp = new Pose(132.458883248731, 60.04467005076141, Math.toRadians(35));
+    public static Pose intakeRedRamp = new Pose(135, 57.0, Math.toRadians(35));
     public static Pose redRampCP = new Pose(103.19390862944162, 58.12994923857866);
     public static Pose bluePark = new Pose(53.076142131979694, 23.350253807106576, Math.toRadians(180));
     public static Pose redPark = new Pose(53.076142131979694, 23.350253807106576, Math.toRadians(0));

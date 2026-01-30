@@ -32,8 +32,9 @@ public class Shooter extends SubsystemBase {
     private ServoEx hood;
     public static double targetVelocity, velocity1, velocity2;
     public static double P,I,kV,kS;
+    private static boolean isAuto;
 
-    public Shooter(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
+    public Shooter(HardwareMap hardwareMap, TelemetryManager telemetryManager, boolean isAuto) {
         sh = hardwareMap.get(DcMotorEx.class, "rsh");
         sh2 = hardwareMap.get(DcMotorEx.class, "lsm");
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -41,6 +42,7 @@ public class Shooter extends SubsystemBase {
         hood = new ServoEx(hardwareMap, "hood");
         sh2.setDirection(DcMotorSimple.Direction.FORWARD);
         I = 0.2;
+        Shooter.isAuto = isAuto;
         P = 1.3;
         kS = 0.06;
         kV = 0.00039;
@@ -106,15 +108,29 @@ public class Shooter extends SubsystemBase {
     }
 
     public static double angleFromDistance(double d) {
-        if (d > 0 && d < 47.8) {
-            return 0.63;
-        }
-        else if (d>=47.8 && d < 70) {
+        if (isAuto) {
+            if (d > 0 && d < 47.8) {
+                return 0.63;
+            }
+            else if (d>=47.8 && d < 70) {
+                return 0.6;
+            }
+            else if (d>=70) {
+                return 0.4;
+            }
             return 0.6;
         }
-        else if (d>=70) {
-            return 0.4;
+        else {
+            if (d > 0 && d < 47.8) {
+                return 0.62;
+            }
+            else if (d>=47.8 && d < 70) {
+                return 0.54;
+            }
+            else if (d>=70) {
+                return 0.4;
+            }
+            return 0.6;
         }
-        return 0.6;
     }
 }

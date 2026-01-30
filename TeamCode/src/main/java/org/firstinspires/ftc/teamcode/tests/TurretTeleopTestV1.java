@@ -16,15 +16,17 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.globals.Localization;
 import org.firstinspires.ftc.teamcode.globals.RobotConstants;
+import org.firstinspires.ftc.teamcode.subsystems.DrivetrainTest;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
 @Configurable
-@TeleOp(name = "Turret Auto Aim Test V1", group = "TeleOp")
+@TeleOp(name = "Turret Auto Aim Test", group = "TeleOp")
 public class TurretTeleopTestV1 extends OpMode {
     private Turret turret;
     private Follower follower;
     private TelemetryManager telemetry;
+    private DrivetrainTest drivetrain;
     private Intake intake;
 
     @Override
@@ -37,6 +39,7 @@ public class TurretTeleopTestV1 extends OpMode {
 
         turret = new Turret(hardwareMap, null);
         follower = createFollower(hardwareMap);
+        drivetrain = new DrivetrainTest(hardwareMap, telemetry);
         follower.setStartingPose(new Pose(140,0,Math.toRadians(90)));
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         intake = new Intake(hardwareMap, telemetry);
@@ -59,12 +62,13 @@ public class TurretTeleopTestV1 extends OpMode {
         // (If your PinpointLocalizer uses a different update method name, change this line.)
         telemetry.addData("encoder", turret.getPos());
         Localization.update();
-        follower.setTeleOpDrive(
-                -gamepad1.left_stick_y,
-                -gamepad1.left_stick_x,
-                -gamepad1.right_stick_x,
-                true
-        );
+        drivetrain.drive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x, 1.0);
+//        follower.setTeleOpDrive(
+//                -gamepad1.left_stick_y,
+//                -gamepad1.left_stick_x,
+//                -gamepad1.right_stick_x,
+//                true
+//        );
 
         // Run your turret auto-aim logic
         if (gamepad1.a) {

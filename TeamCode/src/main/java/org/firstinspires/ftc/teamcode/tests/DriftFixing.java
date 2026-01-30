@@ -15,6 +15,7 @@ import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -28,6 +29,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
 import java.util.List;
 
+@Disabled
 @Configurable
 @TeleOp(name = "drift stuff", group = "TeleOp")
 public class DriftFixing extends OpMode {
@@ -42,7 +44,7 @@ public class DriftFixing extends OpMode {
     @Override
     public void init() {
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-        shooter = new Shooter(hardwareMap, telemetry);
+        shooter = new Shooter(hardwareMap, telemetry, false);
         turret = new Turret(hardwareMap, telemetry);
         follower = createFollower(hardwareMap);
         follower.setStartingPose(new Pose(135,9,Math.toRadians(90)));

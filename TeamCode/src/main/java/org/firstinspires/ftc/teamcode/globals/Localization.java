@@ -109,4 +109,14 @@ public class Localization {
         double goalBearing = redGoalPose.minus(robot).getAsVector().getTheta();
         return AngleUnit.normalizeRadians(goalBearing - turretAbsHeading);
     }
+
+    public static double getGoalDistance(Pose loc, String goal) {
+        if (goal.equals("RED")) {
+            return getRedDistance(loc);
+        }
+        else if (goal.equals("BLUE")) {
+            return getBlueDistance(loc);
+        }
+        return 0.0;
+    }
 }

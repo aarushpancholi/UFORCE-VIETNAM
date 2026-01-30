@@ -3,10 +3,13 @@ package org.firstinspires.ftc.teamcode.vision;
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
 import java.util.OptionalDouble;
@@ -46,11 +49,32 @@ public class AprilTagTracking {
     public OptionalDouble getYawErrorRadToGoal(String goal) {
         LLResult result = limelight.getLatestResult();
         if (result.isValid()) {
-            telemetry.addData("limelight", result.getTx());
-            return OptionalDouble.of(-Math.toRadians(result.getTx()));
+            if (result.getFiducialResults().get(0).getFiducialId() == 24 && goal.equals("RED")) {
+                telemetry.addData("limelight", result.getTx());
+                return OptionalDouble.of(-Math.toRadians(result.getTx()));
+            }
+            else if (result.getFiducialResults().get(0).getFiducialId() == 20 && goal.equals("BLUE")) {
+                telemetry.addData("limelight", result.getTx());
+                return OptionalDouble.of(-Math.toRadians(result.getTx()));
+            }
+            else {
+                return OptionalDouble.empty();
+            }
         }
         else {
             return OptionalDouble.empty();
         }
     }
+    
+//    public Pose getLLPose() {
+//        Pose3D botPose;
+//        Pose llPose = null;
+//        LLResult result = limelight.getLatestResult();
+//        if (result.isValid()) {
+//            botPose = result.getBotpose();
+//            llPose = new Pose(botPose.getPosition().x, botPose.getPosition().y);
+//        }
+//
+//        return llPose;
+//    }
 }

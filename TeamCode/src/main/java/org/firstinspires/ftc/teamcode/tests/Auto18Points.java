@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.tests;
 
+import static org.firstinspires.ftc.teamcode.globals.Localization.getGoalDistance;
 import static org.firstinspires.ftc.teamcode.globals.Localization.getRedDistance;
+import static org.firstinspires.ftc.teamcode.globals.RobotConstants.chosenAlliance;
 import static org.firstinspires.ftc.teamcode.subsystems.Shooter.angleFromDistance;
 import static org.firstinspires.ftc.teamcode.subsystems.Shooter.speedFromDistance;
 
@@ -16,6 +18,7 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
 import com.seattlesolvers.solverslib.command.ParallelRaceGroup;
+import com.seattlesolvers.solverslib.command.Robot;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.WaitCommand;
 import com.seattlesolvers.solverslib.pedroCommand.FollowPathCommand;
@@ -29,6 +32,7 @@ import org.firstinspires.ftc.teamcode.commands.setShooter;
 import org.firstinspires.ftc.teamcode.commands.transfer;
 import org.firstinspires.ftc.teamcode.commands.turretAutoAim;
 import org.firstinspires.ftc.teamcode.globals.Localization;
+import org.firstinspires.ftc.teamcode.globals.RobotConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
@@ -215,7 +219,7 @@ public class Auto18Points extends CommandOpMode {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         intake = new Intake(hardwareMap, telemetryM);
-        shooter = new Shooter(hardwareMap, telemetryM);
+        shooter = new Shooter(hardwareMap, telemetryM, true);
         turret = new Turret(hardwareMap, telemetryM);
 
         intake.setStopper(0.45);
@@ -239,12 +243,12 @@ public class Auto18Points extends CommandOpMode {
                 new turretAutoAim(turret, true),
                 new ParallelCommandGroup(
                         new FollowPathCommand(follower, path1),
-                        new setShooter(shooter, 1215, angleFromDistance(getRedDistance(p1End))),
+                        new setShooter(shooter, 1215, angleFromDistance(getGoalDistance(p1End, chosenAlliance))),
                         new intakeOn1Command(intake)
                 ),
                 shooterSequence,
                 new ParallelCommandGroup(
-                        new setShooter(shooter, 1365, angleFromDistance(getRedDistance(p4End))),
+                        new setShooter(shooter, 1365, angleFromDistance(getGoalDistance(p4End, chosenAlliance))),
                         new transfer(intake, false)
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path2).setGlobalMaxPower(1)
@@ -260,7 +264,7 @@ public class Auto18Points extends CommandOpMode {
                 new FollowPathCommand(follower, path7),
                 shooterSequence,
                 new ParallelCommandGroup(
-                        new setShooter(shooter, 1355, angleFromDistance(getRedDistance(p4End))),
+                        new setShooter(shooter, 1355, angleFromDistance(getGoalDistance(p4End, chosenAlliance))),
                         new transfer(intake, false)
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path8)
@@ -287,7 +291,7 @@ public class Auto18Points extends CommandOpMode {
                 new FollowPathCommand(follower, path11),
                 shooterSequence,
                 new ParallelCommandGroup(
-                        new setShooter(shooter, 1630, angleFromDistance(getRedDistance(p11End))),
+                        new setShooter(shooter, 1630, angleFromDistance(getGoalDistance(p11End, chosenAlliance))),
                         new transfer(intake, false)
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path12)
@@ -312,7 +316,12 @@ public class Auto18Points extends CommandOpMode {
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
-        telemetry.addData("distance", getRedDistance(follower.getPose()));
+        telemetry.addData("distance", getGoalDistance(follower.getPose(), chosenAlliance));
         telemetry.update();
+    }
+
+    @Override
+    public void end() {
+        RobotConstants.savedPose = follower.getPose();
     }
 }

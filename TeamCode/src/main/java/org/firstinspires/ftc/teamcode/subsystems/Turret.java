@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.normalizeRadians;
 import static org.firstinspires.ftc.teamcode.globals.Localization.getRedHeadingDiff;
+import static org.firstinspires.ftc.teamcode.globals.RobotConstants.chosenAlliance;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.maxTurretPos;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.minTurretPos;
 
@@ -37,13 +38,13 @@ public class Turret extends SubsystemBase {
 
     // PIDF (tune these)
     private final PIDFController turretPID = new PIDFController(
-            0.02,  // kP
+            0.021,  // kP
             0.0,    // kI
             0.0015,  // kD
             0.0     // kF
     );
 
-    private static final int TICKS_TOLERANCE = 5;
+    private static final int TICKS_TOLERANCE = 2;
     private double maxPower = 1;
 
     private int targetTicks = 168;
@@ -108,7 +109,7 @@ public class Turret extends SubsystemBase {
         double localErr = getRedHeadingDiff(turretAbsHeading);    // rad, +CCW
 
         // Vision-based aim error (camera-space) as +CCW rad
-        OptionalDouble visionErrOpt = vision.getYawErrorRadToGoal("RED");
+        OptionalDouble visionErrOpt = vision.getYawErrorRadToGoal(chosenAlliance);
 
         // HARD SWITCH:
         // If tag visible -> use ONLY limelight error (with deadband)

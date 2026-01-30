@@ -12,6 +12,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
+@Disabled
 @Autonomous(name = "Auto12Points")
 public class Auto12PointsSubsystemsV3 extends CommandOpMode {
 
@@ -142,7 +144,7 @@ public class Auto12PointsSubsystemsV3 extends CommandOpMode {
         super.reset();
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         intake = new Intake(hardwareMap, telemetryM);
-        shooter = new Shooter(hardwareMap, telemetryM);
+        shooter = new Shooter(hardwareMap, telemetryM, true);
         turret = new Turret(hardwareMap, telemetryM);
         intake.setStopper(0.6);
 

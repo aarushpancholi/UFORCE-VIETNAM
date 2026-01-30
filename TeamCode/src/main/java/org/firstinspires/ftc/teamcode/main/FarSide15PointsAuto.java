@@ -36,8 +36,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
-@Autonomous(name = "Auto15Points")
-public class Auto15Points extends CommandOpMode {
+@Autonomous(name = "Far Side Auto 15 Points")
+public class FarSide15PointsAuto extends CommandOpMode {
 
     private Follower follower;
     private Shooter shooter;
@@ -230,7 +230,7 @@ public class Auto15Points extends CommandOpMode {
                         new setShooter(shooter, 1320, angleFromDistance(getGoalDistance(new Pose(p2End.getX(), p2End.getY()), chosenAlliance))),
                         new intakeOn1Command(intake)
                 ),
-                        new isAimed(turret),
+                new isAimed(turret),
                 new WaitCommand(900),
                 new transfer(intake, true)
                         .alongWith(new InstantCommand(() -> intake.intake2Off())),
@@ -246,7 +246,7 @@ public class Auto15Points extends CommandOpMode {
                         )
                 ),
                 new FollowPathCommand(follower, prePath1End),
-                        new isAimed(turret),
+                new isAimed(turret),
                 new WaitCommand(750),
                 new transfer(intake, true)
                         .alongWith(new InstantCommand(() -> intake.intake2Off())),
@@ -261,7 +261,7 @@ public class Auto15Points extends CommandOpMode {
                         )
                 ),
                 new FollowPathCommand(follower, path2),
-                        new isAimed(turret),
+                new isAimed(turret),
                 new WaitCommand(750),
                 new transfer(intake, true)
                         .alongWith(new InstantCommand(() -> intake.intake2Off())),
@@ -273,7 +273,7 @@ public class Auto15Points extends CommandOpMode {
                         new FollowPathCommand(follower, path3).setGlobalMaxPower(1)
                 ),
                 new FollowPathCommand(follower, path4),
-                        new isAimed(turret),
+                new isAimed(turret),
                 new WaitCommand(750),
                 new transfer(intake, true)
                         .alongWith(new InstantCommand(() -> intake.intake2Off())),
