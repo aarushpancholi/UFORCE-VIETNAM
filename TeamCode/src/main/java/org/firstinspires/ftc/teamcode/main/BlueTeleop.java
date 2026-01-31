@@ -1,15 +1,16 @@
-package org.firstinspires.ftc.teamcode.tests;
+package org.firstinspires.ftc.teamcode.main;
 
 
+import static org.firstinspires.ftc.teamcode.globals.RobotConstants.bluePark;
+import static org.firstinspires.ftc.teamcode.globals.RobotConstants.blueRampCP;
+import static org.firstinspires.ftc.teamcode.globals.RobotConstants.intakeBlueRamp;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.intakeRedRamp;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.redPark;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.redRampCP;
-import static org.firstinspires.ftc.teamcode.globals.RobotConstants.resetPos;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.savedPose;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower;
 
 import android.annotation.SuppressLint;
-import android.opengl.Visibility;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -21,13 +22,13 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
+import com.seattlesolvers.solverslib.command.Robot;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.button.Trigger;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
@@ -46,40 +47,37 @@ import org.firstinspires.ftc.teamcode.globals.RobotConstants;
 import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
-import org.firstinspires.ftc.teamcode.vision.AprilTagTracking;
 
 import java.util.function.BooleanSupplier;
 
-@Disabled
 @Configurable
-@TeleOp(name = "TeleopMain Test", group = "TeleOp")
-public class TeleopMain extends CommandOpMode {
+@TeleOp(name = "Blue TeleOp", group = "TeleOp")
+public class BlueTeleop extends CommandOpMode {
     private Turret turret;
     private double sens = 1.0;
     private Follower follower;
     private Shooter shooter;
     private TelemetryManager telemetry;
     private Intake intake;
-    private AprilTagTracking vision;
 
 
     @Override
     public void initialize() {
         super.reset();
+        RobotConstants.chosenAlliance = "BLUE";
 
         shooter = new Shooter(hardwareMap, telemetry, false);
         turret = new Turret(hardwareMap, telemetry);
         follower = createFollower(hardwareMap);
-        follower.setPose(savedPose != null ? savedPose : new Pose(84.437,20,Math.toRadians(90)));
+        follower.setPose(savedPose != null ? savedPose : new Pose(64.186, 0,Math.toRadians(90)));
         telemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         follower.startTeleOpDrive(true);
         intake = new Intake(hardwareMap, telemetry);
-        vision = new AprilTagTracking(hardwareMap);
         Localization.init(follower, telemetry);
 //        turret.resetTurretEncoder();
         intake.setStopper(0.45);
         shooter.setAutoShoot(true);
-//        turret.setAutoAim(true);
+        turret.setAutoAim(true);
 
         super.register(turret);
         super.register(shooter);
@@ -88,19 +86,24 @@ public class TeleopMain extends CommandOpMode {
         GamepadEx driverOp = new GamepadEx(gamepad1);
         GamepadEx toolOp = new GamepadEx(gamepad2);
 
+        driverOp.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                .whenPressed(
+                        new InstantCommand(() -> turret.resetTurretEncoder())
+                );
+
         driverOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                        .whileHeld(
-                                new FollowPathCommand(follower, follower.pathBuilder()
-                                        .addPath(new BezierCurve(
-                                                follower.getPose(),
-                                                redRampCP,
-                                                intakeRedRamp
-                                        ))
-                                        .setLinearHeadingInterpolation(follower.getHeading(), intakeRedRamp.getHeading())
-                                        .build())
-                        )
+                .whileHeld(
+                        new FollowPathCommand(follower, follower.pathBuilder()
+                                .addPath(new BezierCurve(
+                                        follower.getPose(),
+                                        blueRampCP,
+                                        intakeBlueRamp
+                                ))
+                                .setLinearHeadingInterpolation(follower.getHeading(), intakeBlueRamp.getHeading())
+                                .build())
+                )
                 .whenReleased(
-                            new InstantCommand(() -> follower.startTeleOpDrive(true) )
+                        new InstantCommand(() -> follower.startTeleOpDrive(true) )
 
                 );
 
@@ -109,19 +112,19 @@ public class TeleopMain extends CommandOpMode {
                         new FollowPathCommand(follower, follower.pathBuilder()
                                 .addPath(new BezierLine(
                                         follower.getPose(),
-                                        redPark
+                                        bluePark
                                 ))
-                                .setLinearHeadingInterpolation(follower.getHeading(), redPark.getHeading())
+                                .setLinearHeadingInterpolation(follower.getHeading(), bluePark.getHeading())
                                 .build())
                 )
-                        .whenReleased(
-                                new InstantCommand(() -> follower.startTeleOpDrive(true) )
-                        );
+                .whenReleased(
+                        new InstantCommand(() -> follower.startTeleOpDrive(true) )
+                );
 
         driverOp.getGamepadButton(GamepadKeys.Button.A)
-                        .whileHeld(
-                                new InstantCommand(() -> follower.holdPoint(follower.getPose()))
-                        ).whenReleased(
+                .whileHeld(
+                        new InstantCommand(() -> follower.holdPoint(follower.getPose()))
+                ).whenReleased(
                         new ParallelCommandGroup(
                                 new InstantCommand(() -> follower.startTeleOpDrive(true) )
                         )
@@ -139,18 +142,18 @@ public class TeleopMain extends CommandOpMode {
                                 new transfer(intake, true),
                                 new intakeOn1Command(intake).alongWith(new InstantCommand(() -> intake.intake2On())
 
-                        )
-                ))
-                        .whenReleased(
-                                new SequentialCommandGroup(
-                                        new transfer(intake, false),
-                                        new intakeOn1Command(intake).alongWith(new InstantCommand(() -> intake.intake2On())
+                                )
+                        ))
+                .whenReleased(
+                        new SequentialCommandGroup(
+                                new transfer(intake, false),
+                                new intakeOn1Command(intake).alongWith(new InstantCommand(() -> intake.intake2On())
                                 )
 
                         ));
 
         toolOp.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-                        .whenPressed(new turretStraight(turret));
+                .whenPressed(new turretStraight(turret));
 
         toolOp.getGamepadButton(GamepadKeys.Button.TRIANGLE)
                 .whenPressed(new intakeOn1Command(intake))
@@ -186,10 +189,6 @@ public class TeleopMain extends CommandOpMode {
             gamepad2.rumble(200);
         }
 
-        if (gamepad1.left_trigger > 0.5) {
-            follower.setPose(resetPos);
-        }
-
         sens = (gamepad1.right_trigger > 0.3) ? 2.0 : 1.0;
         follower.setTeleOpDrive(-gamepad1.left_stick_y/sens, -gamepad1.left_stick_x/sens, -gamepad1.right_stick_x/sens, true);
 
@@ -199,7 +198,7 @@ public class TeleopMain extends CommandOpMode {
         telemetry.update();
     }
 
-    }
+}
 
 
 

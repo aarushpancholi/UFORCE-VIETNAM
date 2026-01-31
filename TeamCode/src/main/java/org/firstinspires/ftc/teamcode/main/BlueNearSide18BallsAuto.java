@@ -14,7 +14,6 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
@@ -39,9 +38,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
-@Disabled
-@Autonomous(name = "Auto18Points blue test")
-public class FarSideBlueAutoTest extends CommandOpMode {
+@Autonomous(name = "Blue Near Side 18 Balls Auto")
+public class BlueNearSide18BallsAuto extends CommandOpMode {
 
     private Follower follower;
     private Shooter shooter;
@@ -224,13 +222,14 @@ public class FarSideBlueAutoTest extends CommandOpMode {
     public void initialize() {
         super.reset();
 
+        RobotConstants.chosenAlliance = "BLUE";
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         intake = new Intake(hardwareMap, telemetryM);
         shooter = new Shooter(hardwareMap, telemetryM, true);
         turret = new Turret(hardwareMap, telemetryM);
 
-        intake.setStopper(0.45);
+        intake.setStopper(0.4);
         turret.resetTurretEncoder();
 
         follower = Constants.createFollower(hardwareMap);
@@ -304,9 +303,9 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path12)
                 ),
-                new FollowPathCommand(follower, path14),
-                shooterSequence,
-                new FollowPathCommand(follower, path15)
+                new FollowPathCommand(follower, path14)
+//                shooterSequence,
+//                new FollowPathCommand(follower, path15)
 
         );
 

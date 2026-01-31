@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.firstinspires.ftc.teamcode.globals.Localization.getGoalDistance;
 import static org.firstinspires.ftc.teamcode.globals.Localization.getRedDistance;
+import static org.firstinspires.ftc.teamcode.globals.RobotConstants.chosenAlliance;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.maxEPT;
+import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -54,8 +57,8 @@ public class Shooter extends SubsystemBase {
     @Override
     public void periodic() {
         if (autoShoot) {
-            targetVelocity = speedFromDistance(getRedDistance());
-            pos = angleFromDistance(getRedDistance());
+            targetVelocity = speedFromDistance(getGoalDistance(chosenAlliance));
+            pos = angleFromDistance(getGoalDistance(chosenAlliance));
             setHood(pos);
         }
         telemetry.addData("TargetVel", targetVelocity);
@@ -78,6 +81,13 @@ public class Shooter extends SubsystemBase {
 
     public void setTargetEPT(double ept) {
         targetVelocity = ept;
+    }
+
+    public void setASpeed(double speed) {
+        sh.setPower(speed);
+    }
+    public void setBSpeed(double speed) {
+        sh2.setPower(speed);
     }
 
 

@@ -110,12 +110,32 @@ public class Localization {
         return AngleUnit.normalizeRadians(goalBearing - turretAbsHeading);
     }
 
+    public static double getGoalHeadingDiff(double turretAbsHeading, String goal) {
+        if (goal.equals("RED")) {
+            return getRedHeadingDiff(turretAbsHeading);
+        }
+        else if (goal.equals("BLUE")) {
+            return getBlueHeadingDiff(turretAbsHeading);
+        }
+        return getRedHeadingDiff(turretAbsHeading);
+    }
+
     public static double getGoalDistance(Pose loc, String goal) {
         if (goal.equals("RED")) {
             return getRedDistance(loc);
         }
         else if (goal.equals("BLUE")) {
             return getBlueDistance(loc);
+        }
+        return 0.0;
+    }
+
+    public static double getGoalDistance(String goal) {
+        if (goal.equals("RED")) {
+            return getRedDistance();
+        }
+        else if (goal.equals("BLUE")) {
+            return getBlueDistance();
         }
         return 0.0;
     }

@@ -13,6 +13,7 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
@@ -36,8 +37,9 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
-@Autonomous(name = "Far Side Auto 15 Points")
-public class FarSide15PointsAuto extends CommandOpMode {
+@Disabled
+@Autonomous(name = "blue Far Side Auto 15 Points")
+public class FarSideBlueAutoTest15 extends CommandOpMode {
 
     private Follower follower;
     private Shooter shooter;
@@ -47,42 +49,42 @@ public class FarSide15PointsAuto extends CommandOpMode {
     TelemetryManager telemetryM;
 
     // Headings (radians)
-    private static final double H0 = Math.toRadians(0);
-    private static final double H45 = Math.toRadians(45);
-    private static final double H40 = Math.toRadians(40);
+    private static final double H180 = Math.toRadians(180);
+    private static final double H135 = Math.toRadians(135);
+    private static final double H140 = Math.toRadians(140);
 
     // --- Poses (variables), like your sample style ---
-    private final Pose startPose = new Pose(79.976, 2, Math.toRadians(90));
+    private final Pose startPose = new Pose(79.976, 2, Math.toRadians(90)).mirror();
 
     // Path1: start -> control -> end
-    private final Pose p1CP = new Pose(88.5743654822335, 45.71501015228427);
-    private final Pose p1CP2 = new Pose(133.68026142131976, 53.656025380710666);
-    private final Pose p1End = new Pose(133.1899644670051, 68.03887309644671);
+    private final Pose p1CP = new Pose(88.5743654822335, 45.71501015228427).mirror();
+    private final Pose p1CP2 = new Pose(133.68026142131976, 53.656025380710666).mirror();
+    private final Pose p1End = new Pose(133.1899644670051, 68.03887309644671).mirror();
 
-    private final Pose preP1CP  = new Pose(74.075, 24.865);
-    private final Pose preP1End = new Pose(130.874, 35.708, H0);
-    private final Pose preP1CPEnd = new Pose(94.96345177664976, 42.98172588832489);
+    private final Pose preP1CP  = new Pose(74.075, 24.865).mirror();
+    private final Pose preP1End = new Pose(130.874, 35.708, Math.toRadians(0)).mirror();
+    private final Pose preP1CPEnd = new Pose(94.96345177664976, 42.98172588832489).mirror();
 
 
     // Path2: p1End -> control -> end
-    private final Pose p2CP = new Pose(98.558, 62.796);
-    private final Pose p2End = new Pose(85.5228426395939, 75.728);
+    private final Pose p2CP = new Pose(98.558, 62.796).mirror();
+    private final Pose p2End = new Pose(85.5228426395939, 75.728, Math.toRadians(45)).mirror();
 
     // Path3: p2End -> control -> end
-    private final Pose p3CP = new Pose(100.746, 85.086);
-    private final Pose p3End = new Pose(130.320, 88.785);
+    private final Pose p3CP = new Pose(100.746, 85.086).mirror();
+    private final Pose p3End = new Pose(130.320, 88.785).mirror();
 
     // Path4: line p3End -> p4End
-    private final Pose p4End = new Pose(85.5228426395939, 75.835);
+    private final Pose p4End = new Pose(85.5228426395939, 75.835).mirror();
 
     // Path5: line p4End -> p5End
-    private final Pose p5End = new Pose(137.336, 58);
+    private final Pose p5End = new Pose(137.336, 58).mirror();
 
     // Path6: line p5End -> p6End
-    private final Pose p6End = new Pose(90.5228426395939, 72.5);
+    private final Pose p6End = new Pose(90.5228426395939, 72.5).mirror();
 
     // Path11: line p6End -> p11End
-    private final Pose p11End = new Pose(87.621, 59.852);
+    private final Pose p11End = new Pose(87.621, 59.852).mirror();
 
     // PathChains
     private PathChain setRealStartPath, collectRamp, path1, path2, path3, path4, prePath1, prePath1End, path5, path6, path7, path8, path9, path10, path11;
@@ -93,7 +95,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                 .addPath(new BezierLine(startPose, new Pose(
                         p2End.getX(), p2End.getY()
                 )))
-                .setLinearHeadingInterpolation(Math.toRadians(90), H45)
+                .setLinearHeadingInterpolation(Math.toRadians(90), H135)
                 .build();
         prePath1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -101,7 +103,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         preP1CP,
                         new Pose(preP1End.getX(), preP1End.getY())
                 ))
-                .setLinearHeadingInterpolation(H45, H0)
+                .setLinearHeadingInterpolation(H135, H180)
                 .build();
         prePath1End = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -109,7 +111,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         preP1CP,
                         new Pose(p2End.getX(), p2End.getY())
                 ))
-                .setLinearHeadingInterpolation(H0, H45)
+                .setLinearHeadingInterpolation(H180, H135)
                 .build();
         path1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
@@ -118,7 +120,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         p1CP2,
                         new Pose(p1End.getX(), p1End.getY())
                 ))
-                .setLinearHeadingInterpolation(H45, Math.toRadians(20))
+                .setLinearHeadingInterpolation(H135, Math.toRadians(160))
                 .build();
 
         path2 = follower.pathBuilder()
@@ -127,7 +129,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         p2CP,
                         new Pose(p2End.getX(), p2End.getY())
                 ))
-                .setLinearHeadingInterpolation(Math.toRadians(20), H45)
+                .setLinearHeadingInterpolation(Math.toRadians(160), H135)
                 .build();
 
         path3 = follower.pathBuilder()
@@ -136,7 +138,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         p3CP,
                         new Pose(p3End.getX(), p3End.getY())
                 ))
-                .setLinearHeadingInterpolation(H45, H0)
+                .setLinearHeadingInterpolation(H135, H180)
                 .build();
 
         path4 = follower.pathBuilder()
@@ -144,7 +146,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         new Pose(p3End.getX(), p3End.getY()),
                         new Pose(p2End.getX(), p2End.getY())
                 ))
-                .setLinearHeadingInterpolation(H0, H45)
+                .setLinearHeadingInterpolation(H180, H135)
                 .build();
 
         path5 = follower.pathBuilder()
@@ -152,7 +154,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         new Pose(p4End.getX() + 10, p4End.getY()),
                         new Pose(p5End.getX(), p5End.getY())
                 ))
-                .setLinearHeadingInterpolation(H45, H40)
+                .setLinearHeadingInterpolation(H135, H140)
                 .build();
 
         path6 = follower.pathBuilder()
@@ -160,7 +162,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         new Pose(p5End.getX(), p5End.getY()),
                         new Pose(p2End.getX(), p2End.getY())
                 ))
-                .setConstantHeadingInterpolation(H45)
+                .setConstantHeadingInterpolation(H135)
                 .build();
 
         // Repeated shuttle paths (as in your provided Paths array)
@@ -169,7 +171,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         new Pose(p6End.getX(), p6End.getY()),
                         new Pose(p5End.getX(), p5End.getY())
                 ))
-                .setConstantHeadingInterpolation(H45)
+                .setConstantHeadingInterpolation(H135)
                 .build();
 
         path8 = follower.pathBuilder()
@@ -177,7 +179,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         new Pose(p5End.getX(), p5End.getY()),
                         new Pose(p2End.getX(), p2End.getY())
                 ))
-                .setLinearHeadingInterpolation(Math.toRadians(20), H45)
+                .setLinearHeadingInterpolation(Math.toRadians(160), H135)
                 .build();
 
         path9 = follower.pathBuilder()
@@ -185,7 +187,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         new Pose(p6End.getX(), p6End.getY()),
                         new Pose(p5End.getX(), p5End.getY())
                 ))
-                .setConstantHeadingInterpolation(H45)
+                .setConstantHeadingInterpolation(H135)
                 .build();
 
         path10 = follower.pathBuilder()
@@ -193,7 +195,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         new Pose(p5End.getX(), p5End.getY()),
                         new Pose(p2End.getX(), p2End.getY())
                 ))
-                .setConstantHeadingInterpolation(H45)
+                .setConstantHeadingInterpolation(H135)
                 .build();
 
         path11 = follower.pathBuilder()
@@ -201,7 +203,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         new Pose(p6End.getX(), p6End.getY()),
                         new Pose(p11End.getX(), p11End.getY())
                 ))
-                .setConstantHeadingInterpolation(H45)
+                .setConstantHeadingInterpolation(H135)
                 .build();
     }
 
@@ -230,7 +232,7 @@ public class FarSide15PointsAuto extends CommandOpMode {
                         new setShooter(shooter, 1320, angleFromDistance(getGoalDistance(new Pose(p2End.getX(), p2End.getY()), chosenAlliance))),
                         new intakeOn1Command(intake)
                 ),
-                new isAimed(turret),
+                new isAimed(turret).withTimeout(400),
                 new WaitCommand(900),
                 new transfer(intake, true)
                         .alongWith(new InstantCommand(() -> intake.intake2Off())),

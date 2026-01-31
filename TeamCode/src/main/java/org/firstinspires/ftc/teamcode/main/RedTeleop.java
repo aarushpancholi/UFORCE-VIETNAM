@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tests;
+package org.firstinspires.ftc.teamcode.main;
 
 
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.intakeRedRamp;
@@ -25,6 +25,7 @@ import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.ConditionalCommand;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
+import com.seattlesolvers.solverslib.command.Robot;
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 import com.seattlesolvers.solverslib.command.button.Trigger;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
@@ -60,6 +61,7 @@ public class RedTeleop extends CommandOpMode {
     @Override
     public void initialize() {
         super.reset();
+        RobotConstants.chosenAlliance = "RED";
 
         shooter = new Shooter(hardwareMap, telemetry, false);
         turret = new Turret(hardwareMap, telemetry);
@@ -80,6 +82,11 @@ public class RedTeleop extends CommandOpMode {
 
         GamepadEx driverOp = new GamepadEx(gamepad1);
         GamepadEx toolOp = new GamepadEx(gamepad2);
+
+        driverOp.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                        .whenPressed(
+                                new InstantCommand(() -> turret.resetTurretEncoder())
+                        );
 
         driverOp.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whileHeld(

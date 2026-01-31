@@ -14,7 +14,6 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.seattlesolvers.solverslib.command.CommandOpMode;
 import com.seattlesolvers.solverslib.command.InstantCommand;
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup;
@@ -39,9 +38,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
-@Disabled
-@Autonomous(name = "Auto18Points blue test")
-public class FarSideBlueAutoTest extends CommandOpMode {
+@Autonomous(name = "Red 18 Balls Auto")
+public class RedNearSide18BallsAuto extends CommandOpMode {
 
     private Follower follower;
     private Shooter shooter;
@@ -57,31 +55,25 @@ public class FarSideBlueAutoTest extends CommandOpMode {
     private static final double H35 = Math.toRadians(35);
     private static final double H45 = Math.toRadians(45);
 
-    private static final double H180  = Math.toRadians(180);
-    private static final double H160 = Math.toRadians(160);
-    private static final double H148 = Math.toRadians(148);
-    private static final double H145 = Math.toRadians(145);
-    private static final double H135 = Math.toRadians(135);
-
     // --- Poses (from your provided Paths array) ---
-    private final Pose startPose = new Pose(125.526, 115.883, H45).mirror();
+    private final Pose startPose = new Pose(125.526, 115.883, H45);
 
-    private final Pose p1End  = new Pose(87.431, 89.214).mirror();
-    private final Pose p2End  = new Pose(104.587, 83.383).mirror();
-    private final Pose p3End  = new Pose(130.264, 83.921).mirror();
-    private final Pose p4End  = new Pose(81.889, 81.420).mirror();
-    private final Pose p5End  = new Pose(104.886, 59.284).mirror();
+    private final Pose p1End  = new Pose(87.431, 89.214);
+    private final Pose p2End  = new Pose(104.587, 83.383);
+    private final Pose p3End  = new Pose(130.264, 83.921);
+    private final Pose p4End  = new Pose(81.889, 81.420);
+    private final Pose p5End  = new Pose(104.886, 59.284);
 
-    private final Pose p6CP   = new Pose(126.585, 56.610).mirror();
-    private final Pose p6End  = new Pose(129.823, 56.361).mirror();
+    private final Pose p6CP   = new Pose(126.585, 56.610);
+    private final Pose p6End  = new Pose(129.823, 56.361);
 
-    private final Pose p8CP   = new Pose(117.203, 53.168).mirror();
-    private final Pose p8End  = new Pose(134, 56.7).mirror();
+    private final Pose p8CP   = new Pose(117.203, 53.168);
+    private final Pose p8End  = new Pose(134, 56.7);
 
-    private final Pose p9End = new Pose(105.126, 35.187).mirror();
-    private final Pose p10End = new Pose(135.216, 35.051).mirror();
-    private final Pose p11End = new Pose(84.078, 20.858).mirror();
-    private final Pose p12End = new Pose(84.207, 27.152).mirror();
+    private final Pose p9End = new Pose(105.126, 35.187);
+    private final Pose p10End = new Pose(135.216, 35.051);
+    private final Pose p11End = new Pose(84.078, 20.858);
+    private final Pose p12End = new Pose(84.207, 27.152);
 
 
     // PathChains
@@ -94,7 +86,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(startPose.getX(), startPose.getY()),
                         new Pose(p1End.getX(), p1End.getY())
                 ))
-                .setConstantHeadingInterpolation(H135)
+                .setConstantHeadingInterpolation(H45)
                 .setBrakingStart(0.7)
                 .build();
 
@@ -104,7 +96,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p2End.getX(), p2End.getY()),
                         new Pose(p3End.getX(), p3End.getY())
                 ))
-                .setLinearHeadingInterpolation(H135, H180, 0.3)
+                .setLinearHeadingInterpolation(H45, H0, 0.3)
                 .build();
 //
 //        path3 = follower.pathBuilder()
@@ -121,7 +113,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p4End.getX(), p4End.getY())
                 ))
                 .setBrakingStart(0.7)
-                .setLinearHeadingInterpolation(H180, H135, 0.3)
+                .setLinearHeadingInterpolation(H0, H45, 0.3)
                 .build();
 
         path5 = follower.pathBuilder()
@@ -130,7 +122,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p5End.getX(), p5End.getY()),
                         new Pose(p6End.getX(), p6End.getY())
                 ))
-                .setLinearHeadingInterpolation(H135, H180, 0.3)
+                .setLinearHeadingInterpolation(H45, H0, 0.3)
                 .build();
 
 //        path6 = follower.pathBuilder()
@@ -146,7 +138,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p6End.getX(), p6End.getY()),
                         new Pose(p4End.getX(), p4End.getY())
                 ))
-                .setLinearHeadingInterpolation(H160, H135, 0.3)
+                .setLinearHeadingInterpolation(H20, H45, 0.3)
                 .setBrakingStart(0.7)
                 .build();
 
@@ -156,7 +148,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p8CP.getX(), p8CP.getY()),
                         new Pose(p8End.getX(), p8End.getY())
                 ))
-                .setLinearHeadingInterpolation(H135, H145, 0.3)
+                .setLinearHeadingInterpolation(H45, H35, 0.3)
                 .build();
 
         path9 = follower.pathBuilder()
@@ -164,7 +156,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p8End.getX(), p8End.getY()),
                         new Pose(p4End.getX(), p4End.getY())
                 ))
-                .setLinearHeadingInterpolation(H148, H135)
+                .setLinearHeadingInterpolation(H25, H45)
                 .setBrakingStart(0.7)
                 .build();
 
@@ -174,7 +166,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p8CP.getX(), p8CP.getY()),
                         new Pose(p8End.getX(), p8End.getY())
                 ))
-                .setLinearHeadingInterpolation(H135, H145, 0.3)
+                .setLinearHeadingInterpolation(H45, H35, 0.3)
                 .build();
 
         path11 = follower.pathBuilder()
@@ -182,7 +174,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p8End.getX(), p8End.getY()),
                         new Pose(p4End.getX(), p4End.getY())
                 ))
-                .setLinearHeadingInterpolation(H148, H135, 0.3)
+                .setLinearHeadingInterpolation(H25, H45, 0.3)
                 .setBrakingStart(0.7)
                 .build();
 
@@ -192,7 +184,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p9End.getX(), p9End.getY()),
                         new Pose(p10End.getX(), p10End.getY())
                 ))
-                .setLinearHeadingInterpolation(H135, H180, 0.3)
+                .setLinearHeadingInterpolation(H45, H0, 0.3)
                 .build();
 
 //        path13 = follower.pathBuilder()
@@ -208,7 +200,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p10End.getX(), p10End.getY()),
                         new Pose(p11End.getX(), p11End.getY())
                 ))
-                .setLinearHeadingInterpolation(H180, Math.toRadians(125))
+                .setLinearHeadingInterpolation(H0, Math.toRadians(55))
                 .build();
 
         path15 = follower.pathBuilder()
@@ -216,7 +208,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                         new Pose(p11End.getX(), p11End.getY()),
                         new Pose(p12End.getX(), p12End.getY())
                 ))
-                .setConstantHeadingInterpolation(Math.toRadians(125))
+                .setConstantHeadingInterpolation(Math.toRadians(55))
                 .build();
     }
 
@@ -224,6 +216,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
     public void initialize() {
         super.reset();
 
+        RobotConstants.chosenAlliance = "RED";
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
         intake = new Intake(hardwareMap, telemetryM);
@@ -277,7 +270,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path8)
                 ),
-                new TurnToCommand(follower, H148).withTimeout(100),
+                new TurnToCommand(follower, H25).withTimeout(100),
                 new ParallelRaceGroup(
                         new allBallsDetected(intake),
                         new WaitCommand(750)
@@ -290,7 +283,7 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path10)
                 ),
-                new TurnToCommand(follower, H148).withTimeout(100),
+                new TurnToCommand(follower, H25).withTimeout(100),
                 new ParallelRaceGroup(
                         new allBallsDetected(intake),
                         new WaitCommand(750)
@@ -304,9 +297,9 @@ public class FarSideBlueAutoTest extends CommandOpMode {
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path12)
                 ),
-                new FollowPathCommand(follower, path14),
-                shooterSequence,
-                new FollowPathCommand(follower, path15)
+                new FollowPathCommand(follower, path14)
+//                shooterSequence,
+//                new FollowPathCommand(follower, path15)
 
         );
 

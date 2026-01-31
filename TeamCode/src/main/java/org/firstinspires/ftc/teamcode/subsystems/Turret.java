@@ -2,6 +2,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.normalizeRadians;
+import static org.firstinspires.ftc.teamcode.globals.Localization.getGoalHeadingDiff;
 import static org.firstinspires.ftc.teamcode.globals.Localization.getRedHeadingDiff;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.chosenAlliance;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.maxTurretPos;
@@ -108,7 +109,7 @@ public class Turret extends SubsystemBase {
         double turretAbsHeading = normalizeRadians(robotHeadingPred + turretRelHeading);
 
         // Localization-based aim error (field-space)
-        double localErr = getRedHeadingDiff(turretAbsHeading);    // rad, +CCW
+        double localErr = getGoalHeadingDiff(turretAbsHeading, chosenAlliance);    // rad, +CCW
 
         // Vision-based aim error (camera-space) as +CCW rad
         OptionalDouble visionErrOpt = vision.getYawErrorRadToGoal(chosenAlliance);
@@ -132,6 +133,8 @@ public class Turret extends SubsystemBase {
 
         // Convert to ticks and clamp
         targetTicks = (int) Range.clip(headingToPos(chosenRel), minTurretPos, maxTurretPos);
+
+        targetTicks=168;
 
         // PIDF to targetTicks
         turretPID.setSetPoint(targetTicks);
