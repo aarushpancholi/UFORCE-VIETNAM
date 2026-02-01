@@ -1,14 +1,18 @@
 package org.firstinspires.ftc.teamcode.main;
 
 
+import static org.firstinspires.ftc.teamcode.globals.Localization.getGoalDistance;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.bluePark;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.blueRampCP;
+import static org.firstinspires.ftc.teamcode.globals.RobotConstants.chosenAlliance;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.intakeBlueRamp;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.intakeRedRamp;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.redPark;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.redRampCP;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.savedPose;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower;
+import static org.firstinspires.ftc.teamcode.subsystems.Shooter.angleFromDistance;
+import static org.firstinspires.ftc.teamcode.subsystems.Shooter.speedFromDistance;
 
 import android.annotation.SuppressLint;
 
@@ -41,6 +45,7 @@ import org.firstinspires.ftc.teamcode.commands.intakeOn1Command;
 import org.firstinspires.ftc.teamcode.commands.intakeOn2Command;
 import org.firstinspires.ftc.teamcode.commands.setShooter;
 import org.firstinspires.ftc.teamcode.commands.transfer;
+import org.firstinspires.ftc.teamcode.commands.turretAutoAim;
 import org.firstinspires.ftc.teamcode.commands.turretStraight;
 import org.firstinspires.ftc.teamcode.globals.Localization;
 import org.firstinspires.ftc.teamcode.globals.RobotConstants;
@@ -171,6 +176,32 @@ public class BlueTeleop extends CommandOpMode {
                 .whenPressed(new InstantCommand(intake::intakeOpposite))
                 .whenReleased(
                         new InstantCommand(intake::intakeOff)
+                );
+
+        driverOp.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                .whileHeld(
+                        new ParallelCommandGroup(
+                                new FollowPathCommand(follower,
+                                        follower.pathBuilder()
+                                                .addPath(new BezierLine(
+                                                        follower.getPose(),
+                                                        new Pose(100, 100).mirror())
+                                                )
+                                                .setLinearHeadingInterpolation(follower.getHeading(), Math.toRadians(135))
+                                                .build()),
+                                new InstantCommand(() -> {shooter.setAutoShoot(false);}),
+                                new setShooter(shooter, 1210, 0.6),
+                                new InstantCommand(() -> {turret.isAutoCode = true;})
+
+                        )
+                )
+                .whenReleased(
+                        new ParallelCommandGroup(
+                                new InstantCommand(() -> {shooter.setAutoShoot(true);}),
+                                new InstantCommand(() -> follower.startTeleOpDrive(true)),
+                                new InstantCommand(() -> {turret.isAutoCode = false;}),
+                                new turretAutoAim(turret,true)
+                        )
                 );
 
 

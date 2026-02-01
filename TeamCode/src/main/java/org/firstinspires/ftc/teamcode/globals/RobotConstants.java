@@ -31,8 +31,8 @@ public class RobotConstants {
 
     public static int maxEPT = 1900;
 
-    public static Pose blueGoalPose = new Pose(10, 136, Math.toRadians(90));
-    public static Pose redGoalPose  = new Pose(138, 136, Math.toRadians(90));
+    public static Pose blueGoalPose = new Pose(6, 137, Math.toRadians(90));
+    public static Pose redGoalPose  = new Pose(138, 134, Math.toRadians(90));
 
 
     public static final int RED_GOAL_TAG_ID = 24;

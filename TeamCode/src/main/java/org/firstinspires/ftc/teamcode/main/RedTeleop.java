@@ -1,11 +1,16 @@
 package org.firstinspires.ftc.teamcode.main;
 
 
+import static org.firstinspires.ftc.teamcode.globals.Localization.getGoalDistance;
+import static org.firstinspires.ftc.teamcode.globals.RobotConstants.chosenAlliance;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.intakeRedRamp;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.redPark;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.redRampCP;
+import static org.firstinspires.ftc.teamcode.globals.RobotConstants.resetPos;
 import static org.firstinspires.ftc.teamcode.globals.RobotConstants.savedPose;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Constants.createFollower;
+import static org.firstinspires.ftc.teamcode.subsystems.Shooter.angleFromDistance;
+import static org.firstinspires.ftc.teamcode.subsystems.Shooter.speedFromDistance;
 
 import android.annotation.SuppressLint;
 
@@ -38,6 +43,7 @@ import org.firstinspires.ftc.teamcode.commands.intakeOn1Command;
 import org.firstinspires.ftc.teamcode.commands.intakeOn2Command;
 import org.firstinspires.ftc.teamcode.commands.setShooter;
 import org.firstinspires.ftc.teamcode.commands.transfer;
+import org.firstinspires.ftc.teamcode.commands.turretAutoAim;
 import org.firstinspires.ftc.teamcode.commands.turretStraight;
 import org.firstinspires.ftc.teamcode.globals.Localization;
 import org.firstinspires.ftc.teamcode.globals.RobotConstants;
@@ -71,6 +77,7 @@ public class RedTeleop extends CommandOpMode {
         follower.startTeleOpDrive(true);
         intake = new Intake(hardwareMap, telemetry);
         Localization.init(follower, telemetry);
+        turret.isAutoCode = false;
 //        turret.resetTurretEncoder();
         intake.setStopper(0.45);
         shooter.setAutoShoot(true);
@@ -170,6 +177,32 @@ public class RedTeleop extends CommandOpMode {
                         new InstantCommand(intake::intakeOff)
                 );
 
+        driverOp.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                        .whileHeld(
+                                new ParallelCommandGroup(
+                                        new FollowPathCommand(follower,
+                                                follower.pathBuilder()
+                                                        .addPath(new BezierLine(
+                                                                follower.getPose(),
+                                                                new Pose(96.934, 98.054))
+                                                        )
+                                                        .setLinearHeadingInterpolation(follower.getHeading(), Math.toRadians(45))
+                                                        .build()),
+                                        new InstantCommand(() -> {shooter.setAutoShoot(false);}),
+                                        new setShooter(shooter, (int) speedFromDistance(getGoalDistance(new Pose(96.934, 98.054), chosenAlliance)), angleFromDistance(getGoalDistance(new Pose(96.934, 98.054), chosenAlliance))),
+                                        new InstantCommand(() -> {turret.isAutoCode = true;})
+
+                                        )
+                        )
+                                .whenReleased(
+                                        new ParallelCommandGroup(
+                                                new InstantCommand(() -> {shooter.setAutoShoot(true);}),
+                                                new InstantCommand(() -> follower.startTeleOpDrive(true)),
+                                                new InstantCommand(() -> {turret.isAutoCode = false;}),
+                                                new turretAutoAim(turret,true)
+                                        )
+                                );
+
 
 
         telemetry.update();
@@ -186,6 +219,11 @@ public class RedTeleop extends CommandOpMode {
             gamepad2.rumble(200);
         }
 
+        if (gamepad1.left_trigger > 0.5) {
+            follower.setPose(resetPos);
+        }
+
+
         sens = (gamepad1.right_trigger > 0.3) ? 2.0 : 1.0;
         follower.setTeleOpDrive(-gamepad1.left_stick_y/sens, -gamepad1.left_stick_x/sens, -gamepad1.right_stick_x/sens, true);
 
@@ -194,6 +232,12 @@ public class RedTeleop extends CommandOpMode {
         telemetry.addData("Heading", follower.getPose().getHeading());
         telemetry.update();
     }
+
+    @Override
+    public void end() {
+        savedPose = follower.getPose();
+    }
+
 
 }
 

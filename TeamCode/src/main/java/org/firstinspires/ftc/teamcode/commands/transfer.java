@@ -21,7 +21,7 @@ public class transfer extends CommandBase {
     @Override
     public void initialize() {
         if (on) {
-            intakeSubsystem.setStopper(0.3);
+            intakeSubsystem.setStopper(0.35);
         }
         else {
             intakeSubsystem.setStopper(0.45);
@@ -31,7 +31,7 @@ public class transfer extends CommandBase {
     @Override
     public boolean isFinished() {
         if (on) {
-            return (intakeSubsystem.getStopper() == 0.3);
+            return (intakeSubsystem.getStopper() == 0.35);
         }
         else {
             return (intakeSubsystem.getStopper() == 0.45);

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tests;
+package org.firstinspires.ftc.teamcode.main;
 
 import static org.firstinspires.ftc.teamcode.globals.Localization.getGoalDistance;
 import static org.firstinspires.ftc.teamcode.globals.Localization.getRedDistance;
@@ -61,30 +61,30 @@ public class RedNearSide18BallsAuto extends CommandOpMode {
     private final Pose p1End  = new Pose(87.431, 89.214);
     private final Pose p2End  = new Pose(104.587, 83.383);
     private final Pose p3End  = new Pose(130.264, 83.921);
-    private final Pose p4End  = new Pose(81.889, 81.420);
+    private final Pose p4End  = new Pose(96.934, 98.054);
     private final Pose p5End  = new Pose(104.886, 59.284);
 
     private final Pose p6CP   = new Pose(126.585, 56.610);
-    private final Pose p6End  = new Pose(129.823, 56.361);
+    private final Pose p6End  = new Pose(132.823, 56.361);
 
     private final Pose p8CP   = new Pose(117.203, 53.168);
-    private final Pose p8End  = new Pose(134, 56.7);
+    private final Pose p8End  = new Pose(134.2, 57);
 
     private final Pose p9End = new Pose(105.126, 35.187);
-    private final Pose p10End = new Pose(135.216, 35.051);
+    private final Pose p10End = new Pose(135.216, 30.051);
     private final Pose p11End = new Pose(84.078, 20.858);
     private final Pose p12End = new Pose(84.207, 27.152);
 
 
     // PathChains
     private PathChain path1, path2, path3, path4, path5, path6, path7,
-            path8, path9, path10, path11, path12, path13, path14, path15;
+            path8, path9, path10, path11, path12, path13, path14, path15, newPath14, newPath15;
 
     private void buildPaths() {
         path1 = follower.pathBuilder()
                 .addPath(new BezierLine(
                         new Pose(startPose.getX(), startPose.getY()),
-                        new Pose(p1End.getX(), p1End.getY())
+                        new Pose(p4End.getX(), p4End.getY())
                 ))
                 .setConstantHeadingInterpolation(H45)
                 .setBrakingStart(0.7)
@@ -92,7 +92,7 @@ public class RedNearSide18BallsAuto extends CommandOpMode {
 
         path2 = follower.pathBuilder()
                 .addPath(new BezierCurve(
-                        new Pose(p1End.getX(), p1End.getY()),
+                        new Pose(p4End.getX(), p4End.getY()),
                         new Pose(p2End.getX(), p2End.getY()),
                         new Pose(p3End.getX(), p3End.getY())
                 ))
@@ -210,6 +210,19 @@ public class RedNearSide18BallsAuto extends CommandOpMode {
                 ))
                 .setConstantHeadingInterpolation(Math.toRadians(55))
                 .build();
+
+        newPath14 = follower.pathBuilder()
+                .addPath(new BezierLine(p10End, p4End))
+                .setLinearHeadingInterpolation(H0, H45)
+                .build();
+
+        newPath15 = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        new Pose(p4End.getX(), p4End.getY()),
+                        new Pose(p4End.getX(), 60)
+                ))
+                .setConstantHeadingInterpolation(H45)
+                .build();
     }
 
     @Override
@@ -225,6 +238,7 @@ public class RedNearSide18BallsAuto extends CommandOpMode {
 
         intake.setStopper(0.45);
         turret.resetTurretEncoder();
+        turret.isAutoCode = true;
 
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
@@ -244,12 +258,12 @@ public class RedNearSide18BallsAuto extends CommandOpMode {
                 new turretAutoAim(turret, true),
                 new ParallelCommandGroup(
                         new FollowPathCommand(follower, path1),
-                        new setShooter(shooter, 1215, angleFromDistance(getGoalDistance(p1End, chosenAlliance))),
+                        new setShooter(shooter, (int) speedFromDistance(getGoalDistance(p4End, chosenAlliance)), angleFromDistance(getGoalDistance(p1End, chosenAlliance))),
                         new intakeOn1Command(intake)
                 ),
                 shooterSequence,
                 new ParallelCommandGroup(
-                        new setShooter(shooter, 1365, angleFromDistance(getGoalDistance(p4End, chosenAlliance))),
+//                        new setShooter(shooter, (int) speedFromDistance(getGoalDistance(p4End, chosenAlliance)), angleFromDistance(getGoalDistance(p4End, chosenAlliance))),
                         new transfer(intake, false)
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path2).setGlobalMaxPower(1)
@@ -265,7 +279,6 @@ public class RedNearSide18BallsAuto extends CommandOpMode {
                 new FollowPathCommand(follower, path7),
                 shooterSequence,
                 new ParallelCommandGroup(
-                        new setShooter(shooter, 1355, angleFromDistance(getGoalDistance(p4End, chosenAlliance))),
                         new transfer(intake, false)
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path8)
@@ -273,33 +286,32 @@ public class RedNearSide18BallsAuto extends CommandOpMode {
                 new TurnToCommand(follower, H25).withTimeout(100),
                 new ParallelRaceGroup(
                         new allBallsDetected(intake),
-                        new WaitCommand(750)
+                        new WaitCommand(1500)
 
                 ),
                 new FollowPathCommand(follower, path9),
                 shooterSequence,
+//                new ParallelCommandGroup(
+//                        new transfer(intake, false)
+//                                .alongWith(new InstantCommand(() -> intake.intake2Off())),
+//                        new FollowPathCommand(follower, path10)
+//                ),
+//                new TurnToCommand(follower, H25).withTimeout(100),
+//                new ParallelRaceGroup(
+//                        new allBallsDetected(intake),
+//                        new WaitCommand(750)
+//
+//                ),
+//                new FollowPathCommand(follower, path11),
+//                shooterSequence,
                 new ParallelCommandGroup(
-                        new transfer(intake, false)
-                                .alongWith(new InstantCommand(() -> intake.intake2Off())),
-                        new FollowPathCommand(follower, path10)
-                ),
-                new TurnToCommand(follower, H25).withTimeout(100),
-                new ParallelRaceGroup(
-                        new allBallsDetected(intake),
-                        new WaitCommand(750)
-
-                ),
-                new FollowPathCommand(follower, path11),
-                shooterSequence,
-                new ParallelCommandGroup(
-                        new setShooter(shooter, 1630, angleFromDistance(getGoalDistance(p11End, chosenAlliance))),
                         new transfer(intake, false)
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path12)
                 ),
-                new FollowPathCommand(follower, path14)
-//                shooterSequence,
-//                new FollowPathCommand(follower, path15)
+                new FollowPathCommand(follower, newPath14),
+                shooterSequence,
+                new FollowPathCommand(follower, newPath15)
 
         );
 

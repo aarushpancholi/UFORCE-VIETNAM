@@ -38,10 +38,11 @@ public class Turret extends SubsystemBase {
 
     // Limelight deadband to prevent oscillation (±1°)
     private static final double VISION_DEADBAND_RAD = Math.toRadians(1.0);
-    public static double kP = 0.011;
+    public static double kP = 0.012;
     public static double kI = 0.0;
     public static double kD = 0.0003;
     public static double kF = 0.0002;
+    public boolean isAutoCode = false;
     // PIDF (tune these)
     public static PIDFController turretPID = new PIDFController(
             kP, kI, kD, kF
@@ -134,7 +135,8 @@ public class Turret extends SubsystemBase {
         // Convert to ticks and clamp
         targetTicks = (int) Range.clip(headingToPos(chosenRel), minTurretPos, maxTurretPos);
 
-        targetTicks=168;
+//        targetTicks=168;
+        if (isAutoCode) targetTicks = 163;
 
         // PIDF to targetTicks
         turretPID.setSetPoint(targetTicks);

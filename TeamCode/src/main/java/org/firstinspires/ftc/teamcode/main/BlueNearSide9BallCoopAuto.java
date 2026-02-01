@@ -38,8 +38,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 import org.firstinspires.ftc.teamcode.subsystems.Turret;
 
-@Autonomous(name = "Blue 18 Balls Auto")
-public class BlueNearSide18BallsAuto extends CommandOpMode {
+@Autonomous(name = "Blue Coop 9 Balls Auto")
+public class BlueNearSide9BallCoopAuto extends CommandOpMode {
 
     private Follower follower;
     private Shooter shooter;
@@ -63,25 +63,19 @@ public class BlueNearSide18BallsAuto extends CommandOpMode {
 
     private final Pose p1End  = new Pose(84.931, 89.214).mirror();
     private final Pose p2End  = new Pose(102.087, 83.383).mirror();
-    private final Pose p3End  = new Pose(126.764, 83.921).mirror();
+    private final Pose p3End  = new Pose(130.764, 83.921).mirror();
     private final Pose p4End  = new Pose(100, 100).mirror();
-    private final Pose p5End  = new Pose(94.386, 59.284).mirror();
+    private final Pose p5End  = new Pose(94.386, 64.284).mirror();
 
-    private final Pose p6CP   = new Pose(124.085, 58.610).mirror();
-    private final Pose p6End  = new Pose(126.323, 58.361).mirror();
-
-    private final Pose p8CP   = new Pose(104.703, 53.168).mirror();
-    private final Pose p8End  = new Pose(132.8, 65.5).mirror();
-
-    private final Pose p9End = new Pose(85.626, 37.187).mirror();
-    private final Pose p10End = new Pose(127.716, 37.051).mirror();
-    private final Pose p11End = new Pose(76.578, 20.858).mirror();
-    private final Pose p12End = new Pose(76.707, 27.152).mirror();
+    private final Pose p6End  = new Pose(126.323, 64.361).mirror();
+    private final Pose p7End = new Pose(23.677, 64.361);
+    private final Pose p8End = new Pose(12.677, 73.361);
+    private final Pose centerCP = new Pose(64, 64);
 
 
     // PathChains
-    private PathChain path1, path2, path3, path4, path5, path6, path7,
-            path8, path9, path10, path11, path12, path13, path14, path15, newPath14, newPath15;
+    private PathChain path1, path2, path4, path2Shorter, path5, path7,
+            blueRampClear, path16RampExit, lastPath;
 
     private void buildPaths() {
         path1 = follower.pathBuilder()
@@ -101,14 +95,6 @@ public class BlueNearSide18BallsAuto extends CommandOpMode {
                 ))
                 .setLinearHeadingInterpolation(H135, H180, 0.3)
                 .build();
-//
-//        path3 = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Pose(p2End.getX(), p2End.getY()),
-//                        new Pose(p3End.getX(), p3End.getY())
-//                ))
-//                .setConstantHeadingInterpolation(H0)
-//                .build();
 
         path4 = follower.pathBuilder()
                 .addPath(new BezierLine(
@@ -119,6 +105,17 @@ public class BlueNearSide18BallsAuto extends CommandOpMode {
                 .setLinearHeadingInterpolation(H180, H135, 0.3)
                 .build();
 
+        path2Shorter =
+                follower.pathBuilder()
+                        .addPath(new BezierCurve(
+                                new Pose(p4End.getX(), p4End.getY()),
+                                new Pose(p2End.getX(), p2End.getY()),
+                                new Pose(p3End.getX() + 5, p3End.getY() + 4)
+                        ))
+                        .setBrakingStart(0.7)
+                        .setLinearHeadingInterpolation(H135, H180, 0.3)
+                        .build();
+
         path5 = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         new Pose(p4End.getX(), p4End.getY()),
@@ -128,104 +125,45 @@ public class BlueNearSide18BallsAuto extends CommandOpMode {
                 .setLinearHeadingInterpolation(H135, H180, 0.3)
                 .build();
 
-//        path6 = follower.pathBuilder()
-//                .addPath(new BezierCurve(
-//                        new Pose(p5End.getX(), p5End.getY()),
-//
-//                ))
-//                .setLinearHeadingInterpolation(H0)
-//                .build();
+        blueRampClear = follower.pathBuilder()
+                .addPath(new BezierLine(
+                        p6End,
+                        p7End
+                ))
+                .setConstantHeadingInterpolation(H180)
+                .build();
+
+        path16RampExit = follower.pathBuilder()
+                .addPath(
+                        new BezierLine(
+                                p7End, p8End
+                        )
+                )
+                .setConstantHeadingInterpolation(H180)
+                .build();
+
 
         path7 = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        new Pose(p6End.getX(), p6End.getY()),
-                        new Pose(p4End.getX(), p4End.getY())
+                .addPath(new BezierCurve(
+                        p8End,
+                        centerCP,
+                        p4End
                 ))
-                .setLinearHeadingInterpolation(H160, H135, 0.3)
+                .setLinearHeadingInterpolation(H180, H135, 0.3)
                 .setBrakingStart(0.7)
                 .build();
 
-        path8 = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        new Pose(p4End.getX(), p4End.getY()),
-                        new Pose(p8CP.getX(), p8CP.getY()),
-                        new Pose(p8End.getX(), p8End.getY())
-                ))
-                .setLinearHeadingInterpolation(H135, H145, 0.3)
-                .build();
-
-        path9 = follower.pathBuilder()
+        lastPath = follower.pathBuilder()
                 .addPath(new BezierLine(
-                        new Pose(p8End.getX(), p8End.getY()),
-                        new Pose(p4End.getX(), p4End.getY())
+                        p3End,
+                        new Pose(p3End.getX() + 20, p3End.getY())
                 ))
-                .setLinearHeadingInterpolation(H155, H135)
+                .setConstantHeadingInterpolation(H180)
                 .setBrakingStart(0.7)
                 .build();
 
-        path10 = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        new Pose(p4End.getX(), p4End.getY()),
-                        new Pose(p8CP.getX(), p8CP.getY()),
-                        new Pose(p8End.getX(), p8End.getY())
-                ))
-                .setLinearHeadingInterpolation(H135, H145, 0.3)
-                .build();
 
-        path11 = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        new Pose(p8End.getX(), p8End.getY()),
-                        new Pose(p4End.getX(), p4End.getY())
-                ))
-                .setLinearHeadingInterpolation(H155, H135, 0.3)
-                .setBrakingStart(0.7)
-                .build();
 
-        path12 = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        new Pose(p4End.getX(), p4End.getY()),
-                        new Pose(p9End.getX(), p9End.getY()),
-                        new Pose(p10End.getX(), p10End.getY())
-                ))
-                .setLinearHeadingInterpolation(H135, H180, 0.2)
-                .build();
-
-//        path13 = follower.pathBuilder()
-//                .addPath(new BezierLine(
-//                        new Pose(p9End.getX(), p9End.getY()),
-//                        new Pose(p10End.getX(), p10End.getY())
-//                ))
-//                .setConstantHeadingInterpolation(H0)
-//                .build();
-
-        path14 = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        new Pose(p10End.getX(), p10End.getY()),
-                        new Pose(p11End.getX(), p11End.getY())
-                ))
-                .setLinearHeadingInterpolation(H180, Math.toRadians(125))
-                .build();
-
-        path15 = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        new Pose(p11End.getX(), p11End.getY()),
-                        new Pose(p12End.getX(), p12End.getY())
-                ))
-                .setConstantHeadingInterpolation(Math.toRadians(125))
-                .build();
-
-        newPath14 = follower.pathBuilder()
-                .addPath(new BezierLine(p10End, p4End))
-                .setLinearHeadingInterpolation(H180, H135)
-                .build();
-
-        newPath15 = follower.pathBuilder()
-                .addPath(new BezierLine(
-                        new Pose(p4End.getX(), p4End.getY()),
-                        new Pose(p4End.getX(), 72)
-                ))
-                .setConstantHeadingInterpolation(H135)
-                .build();
     }
 
     @Override
@@ -261,49 +199,34 @@ public class BlueNearSide18BallsAuto extends CommandOpMode {
                 new turretAutoAim(turret, true),
                 new ParallelCommandGroup(
                         new FollowPathCommand(follower, path1),
-                        new setShooter(shooter, 1200, 0.6),
+                        new setShooter(shooter, 1185, 0.6),
                         new intakeOn1Command(intake)
                 ),
-                shooterSequence,
-                new ParallelCommandGroup(
-//                        new setShooter(shooter, (int) speedFromDistance(getGoalDistance(p4End, chosenAlliance)), angleFromDistance(getGoalDistance(p4End, chosenAlliance))),
-                        new transfer(intake, false)
-                                .alongWith(new InstantCommand(() -> intake.intake2Off())),
-                        new FollowPathCommand(follower, path2).setGlobalMaxPower(1)
-                ),
-//                new FollowPathCommand(follower, path3),
-                new FollowPathCommand(follower, path4),
                 shooterSequence,
                 new ParallelCommandGroup(
                         new transfer(intake, false)
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path5)
                 ),
+                new FollowPathCommand(follower, blueRampClear),
+                new FollowPathCommand(follower, path16RampExit).withTimeout(750),
+                new WaitCommand(1500),
                 new FollowPathCommand(follower, path7),
                 shooterSequence,
                 new ParallelCommandGroup(
                         new transfer(intake, false)
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
-                        new FollowPathCommand(follower, path8)
+                        new FollowPathCommand(follower, path2Shorter).setGlobalMaxPower(1)
                 ),
-                new TurnToCommand(follower, H155).withTimeout(100),
-                new ParallelRaceGroup(
-                        new allBallsDetected(intake),
-                        new WaitCommand(1500)
-
-                ),
-                new FollowPathCommand(follower, path9),
+                new FollowPathCommand(follower, path4),
                 shooterSequence,
-
                 new ParallelCommandGroup(
                         new transfer(intake, false)
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
-                        new FollowPathCommand(follower, path12)
+                        new FollowPathCommand(follower, path2).setGlobalMaxPower(1)
                 ),
-                new FollowPathCommand(follower, newPath14),
-                shooterSequence,
-                new FollowPathCommand(follower, newPath15)
-
+                new WaitCommand(1500),
+                new FollowPathCommand(follower, lastPath)
         );
 
         schedule(autonomousSequence);

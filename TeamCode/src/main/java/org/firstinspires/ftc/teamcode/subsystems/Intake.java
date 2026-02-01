@@ -117,7 +117,7 @@ public class Intake extends SubsystemBase {
     public void intake2On() {
 //        servoA.setPower(1.0);
 //        servoB.setPower(1.0);
-        intakeMotor.setPower(1);
+        intakeMotor.setPower(0.9);
 
     }
 
