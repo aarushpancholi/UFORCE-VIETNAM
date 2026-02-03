@@ -11,16 +11,10 @@ import com.seattlesolvers.solverslib.hardware.servos.ServoEx;
 
 public class Intake extends SubsystemBase {
 
-    // ------------------------------
-    // Ranger in 15° FOV mode = ANALOG VOLTAGE
-    // ------------------------------
     private final AnalogInput s1;
     private final AnalogInput s2;
     private final AnalogInput s3;
 
-    // ------------------------------
-    // Hardware
-    // ------------------------------
     private final DcMotorEx intakeMotor;
     private final CRServo servoA;
 
@@ -29,27 +23,6 @@ public class Intake extends SubsystemBase {
 
     private final TelemetryManager telemetry;
 
-    // ------------------------------
-    // TUNING (YOU MUST CALIBRATE)
-    // ------------------------------
-    // Pick these from telemetry:
-    // - Measure voltage with NO ball (V_empty)
-    // - Measure voltage with ball present (V_ball)
-    // - Set threshold between them (average is a good start)
-    //
-    // If you discover voltage goes DOWN when ball is present, flip the comparisons (see NOTE below).
-    private static final double S1_DETECT_V = 0.18;  // placeholder
-    private static final double S2_DETECT_V = 0.18;  // placeholder
-    private static final double S3_DETECT_V = 0.18;  // placeholder
-
-    // Hysteresis band (reduces flicker at threshold)
-    private static final double HYST_V = 0.05;
-
-    // If true: "detected" means voltage >= threshold (common)
-    // If false: "detected" means voltage <= threshold (some sensors behave like this)
-    private static final boolean DETECT_IS_HIGHER_V = false;
-
-    // Latched states (memory) for hysteresis
     private boolean s1Detected = false;
     private boolean s2Detected = false;
     private boolean s3Detected = false;
@@ -58,7 +31,6 @@ public class Intake extends SubsystemBase {
 
     public Intake(HardwareMap hardwareMap, TelemetryManager telemetryManager) {
 
-        // Analog inputs (make sure Ranger analog out is plugged into REV ANALOG ports)
         s1 = hardwareMap.get(AnalogInput.class, "s1");
         s2 = hardwareMap.get(AnalogInput.class, "s2");
         s3 = hardwareMap.get(AnalogInput.class, "s3");
@@ -74,8 +46,7 @@ public class Intake extends SubsystemBase {
 
         servoA.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        servoB.setDirection(DcMotorSimple.Direction.FORWARD
-        );
+        servoB.setDirection(DcMotorSimple.Direction.FORWARD);
 
         telemetry = telemetryManager;
     }
@@ -123,26 +94,6 @@ public class Intake extends SubsystemBase {
 //        intakeMotor.setPower(1.0);
     }
 
-    private boolean detectWithHysteresisHigherIsDetected(double v, double threshold, boolean prevState) {
-        // ON when v >= threshold + HYST
-        // OFF when v <  threshold - HYST
-        if (prevState) return v >= (threshold - HYST_V);
-        return v >= (threshold + HYST_V);
-    }
-
-    private boolean detectWithHysteresisLowerIsDetected(double v, double threshold, boolean prevState) {
-        // ON when v <= threshold - HYST
-        // OFF when v >  threshold + HYST
-        if (prevState) return v <= (threshold + HYST_V);
-        return v <= (threshold - HYST_V);
-    }
-
-    private boolean computeDetected(double v, double threshold, boolean prevState) {
-        return DETECT_IS_HIGHER_V
-                ? detectWithHysteresisHigherIsDetected(v, threshold, prevState)
-                : detectWithHysteresisLowerIsDetected(v, threshold, prevState);
-    }
-
     public boolean isBallDetected01() {
         return ((s1.getVoltage()*32.50930976)-2.695384202) < 3.5;
     }
@@ -168,10 +119,6 @@ public class Intake extends SubsystemBase {
     }
 
     public void testSensors() {
-        double v1 = s1.getVoltage();
-        double v2 = s2.getVoltage();
-        double v3 = s3.getVoltage();
-
         boolean d1 = isBallDetected01();
         boolean d2 = isBallDetected02();
         boolean d3 = isBallDetected03();
