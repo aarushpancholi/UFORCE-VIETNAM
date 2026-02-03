@@ -83,6 +83,7 @@ public class BlueTeleop extends CommandOpMode {
         intake.setStopper(0.45);
         shooter.setAutoShoot(true);
         turret.setAutoAim(true);
+        turret.isAutoCode = false;
 
         super.register(turret);
         super.register(shooter);

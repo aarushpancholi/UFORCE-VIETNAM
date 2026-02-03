@@ -136,7 +136,9 @@ public class Turret extends SubsystemBase {
         targetTicks = (int) Range.clip(headingToPos(chosenRel), minTurretPos, maxTurretPos);
 
 //        targetTicks=168;
-        if (isAutoCode) targetTicks = 163;
+        // 168 for red
+        // 163 for blue
+        if (isAutoCode) targetTicks = 160;
 
         // PIDF to targetTicks
         turretPID.setSetPoint(targetTicks);

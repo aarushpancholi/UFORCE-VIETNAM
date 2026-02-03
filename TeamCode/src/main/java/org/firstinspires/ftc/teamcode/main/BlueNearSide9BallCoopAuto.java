@@ -63,6 +63,9 @@ public class BlueNearSide9BallCoopAuto extends CommandOpMode {
 
     private final Pose p1End  = new Pose(84.931, 89.214).mirror();
     private final Pose p2End  = new Pose(102.087, 83.383).mirror();
+    private final Pose rampCollectCP   = new Pose(104.703, 53.168).mirror();
+    private final Pose rampCollectEnd  = new Pose(132.8, 65.5).mirror();
+
     private final Pose p3End  = new Pose(130.764, 83.921).mirror();
     private final Pose p4End  = new Pose(100, 100).mirror();
     private final Pose p5End  = new Pose(94.386, 64.284).mirror();
@@ -75,7 +78,7 @@ public class BlueNearSide9BallCoopAuto extends CommandOpMode {
 
     // PathChains
     private PathChain path1, path2, path4, path2Shorter, path5, path7,
-            blueRampClear, path16RampExit, lastPath;
+            blueRampClear, path16RampExit, lastPath, rampCollectPath, secondLastPath, thirdLastPath;
 
     private void buildPaths() {
         path1 = follower.pathBuilder()
@@ -104,6 +107,16 @@ public class BlueNearSide9BallCoopAuto extends CommandOpMode {
                 .setBrakingStart(0.7)
                 .setLinearHeadingInterpolation(H180, H135, 0.3)
                 .build();
+
+        rampCollectPath = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        new Pose(p4End.getX(), p4End.getY()),
+                        new Pose(rampCollectCP.getX(), rampCollectCP.getY()),
+                        new Pose(rampCollectEnd.getX(), rampCollectEnd.getY())
+                ))
+                .setLinearHeadingInterpolation(H135, H145, 0.3)
+                .build();
+
 
         path2Shorter =
                 follower.pathBuilder()
@@ -153,12 +166,22 @@ public class BlueNearSide9BallCoopAuto extends CommandOpMode {
                 .setBrakingStart(0.7)
                 .build();
 
+        secondLastPath = follower.pathBuilder()
+                .addPath(new BezierCurve(
+                        p3End,
+                        new Pose(p3End.getX() + 35, p3End.getY()),
+                        p4End
+                ))
+                .setLinearHeadingInterpolation(H155, H135)
+                .setBrakingStart(0.7)
+                .build();
+
         lastPath = follower.pathBuilder()
                 .addPath(new BezierLine(
-                        p3End,
+                        p4End,
                         new Pose(p3End.getX() + 20, p3End.getY())
                 ))
-                .setConstantHeadingInterpolation(H180)
+                .setLinearHeadingInterpolation(H135, H180)
                 .setBrakingStart(0.7)
                 .build();
 
@@ -225,7 +248,21 @@ public class BlueNearSide9BallCoopAuto extends CommandOpMode {
                                 .alongWith(new InstantCommand(() -> intake.intake2Off())),
                         new FollowPathCommand(follower, path2).setGlobalMaxPower(1)
                 ),
-                new WaitCommand(1500),
+                new WaitCommand(700),
+                new FollowPathCommand(follower, secondLastPath),
+                new ParallelCommandGroup(
+                        new transfer(intake, false)
+                                .alongWith(new InstantCommand(() -> intake.intake2Off())),
+                        new FollowPathCommand(follower, rampCollectPath)
+                ),
+                new TurnToCommand(follower, H155).withTimeout(100),
+                new ParallelRaceGroup(
+                        new allBallsDetected(intake),
+                        new WaitCommand(1500)
+
+                ),
+                new FollowPathCommand(follower, secondLastPath),
+                shooterSequence,
                 new FollowPathCommand(follower, lastPath)
         );
 
