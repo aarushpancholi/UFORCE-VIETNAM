@@ -92,14 +92,13 @@ public class Shooter extends SubsystemBase {
 
 
     public void setHood(double pos) {
-        hood.set(pos); // immediate update + update() will maintain it
+        hood.set(pos);
     }
 
     public double getHoodPos() {
         return hood.get();
     }
 
-    // Use the documented MotorEx velocity getter. getVelocity() is ticks/sec by default. :contentReference[oaicite:3]{index=3}
     public int getVelA() { return (int) sh.getVelocity(); }
     public int getVelB() { return (int) sh2.getVelocity(); }
 

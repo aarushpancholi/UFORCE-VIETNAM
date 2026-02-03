@@ -29,14 +29,11 @@ public class Turret extends SubsystemBase {
 
     public boolean autoAimEnabled = false;
 
-    // Turret mechanical range in degrees: [-135, +135]
     private static final double MIN_TURRET_RAD = Math.toRadians(-135);
     private static final double MAX_TURRET_RAD = Math.toRadians(135);
 
-    // Heading prediction (helps while rotating)
-    private static final double HEADING_LEAD_SEC = 0.12; // tune 0.03–0.15
+    private static final double HEADING_LEAD_SEC = 0.12;
 
-    // Limelight deadband to prevent oscillation (±1°)
     private static final double VISION_DEADBAND_RAD = Math.toRadians(1.0);
     public static double kP = 0.012;
     public static double kI = 0.0;
@@ -59,11 +56,9 @@ public class Turret extends SubsystemBase {
         turret.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         turret.setInverted(true);
 
-        // Limelight vision (safe init, no start here)
         vision = new AprilTagTracking(hardwareMap);
     }
 
-    /** Call once from OpMode init() after constructing Turret */
     public void startVision() {
         vision.start();
     }
@@ -100,22 +95,18 @@ public class Turret extends SubsystemBase {
     public void periodic() {
         if (!autoAimEnabled) return;
 
-        // Robot heading + lead prediction
-        double robotHeading = Localization.getHeading();          // rad
-        double omega = Localization.getHeadingVelocity();         // rad/s
+        double robotHeading = Localization.getHeading();
+        double omega = Localization.getHeadingVelocity();
         double robotHeadingPred = normalizeRadians(robotHeading + omega * HEADING_LEAD_SEC);
 
-        // Current turret headings
-        double turretRelHeading = posToHeading(getPos());         // rad in [-135,+135]
+        double turretRelHeading = posToHeading(getPos());
         double turretAbsHeading = normalizeRadians(robotHeadingPred + turretRelHeading);
 
-        // Localization-based aim error (field-space)
-        double localErr = getGoalHeadingDiff(turretAbsHeading, chosenAlliance);    // rad, +CCW
+        double localErr = getGoalHeadingDiff(turretAbsHeading, chosenAlliance);
 
-        // Vision-based aim error (camera-space) as +CCW rad
         OptionalDouble visionErrOpt = vision.getYawErrorRadToGoal(chosenAlliance);
 
-        // If tag visible -> use ONLY limelight error (with deadband)
+        // If tag visible -> use ONLY limelight error
         // Else -> use localization
         double aimErr;
         if (visionErrOpt.isPresent()) {
@@ -125,14 +116,11 @@ public class Turret extends SubsystemBase {
             aimErr = localErr;
         }
 
-        // Convert aim error to a desired absolute heading
         double targetAbsHeading = normalizeRadians(turretAbsHeading + aimErr);
 
-        // Convert to desired turret-relative angle, handle wrap + bounds behavior
-        double relToTarget = targetAbsHeading - robotHeadingPred; // intentionally not normalized first
+        double relToTarget = targetAbsHeading - robotHeadingPred;
         double chosenRel = chooseTurretRelHeading(relToTarget, turretRelHeading);
 
-        // Convert to ticks and clamp
         targetTicks = (int) Range.clip(headingToPos(chosenRel), minTurretPos, maxTurretPos);
 
 //        targetTicks=168;
@@ -160,10 +148,6 @@ public class Turret extends SubsystemBase {
         return Math.abs(targetTicks - turret.getCurrentPosition()) <= TICKS_TOLERANCE;
     }
 
-    // -----------------------------
-    // Linear mapping (ticks <-> radians)
-    // -----------------------------
-
     private double posToHeading(double posTicks) {
         double pos = Range.clip(posTicks, minTurretPos, maxTurretPos);
         double t = (pos - minTurretPos) / (maxTurretPos - minTurretPos); // 0..1
@@ -176,16 +160,12 @@ public class Turret extends SubsystemBase {
         return minTurretPos + t * (maxTurretPos - minTurretPos);
     }
 
-    // -----------------------------
-    // Angle selection / bounds behavior
-    // -----------------------------
 
     private double chooseTurretRelHeading(double relRad, double currentTurretRelRad) {
         double base = normalizeRadians(relRad);
 
         double[] candidates = new double[] { base, base + 2.0 * Math.PI, base - 2.0 * Math.PI };
 
-        // If reachable, pick the in-range candidate closest to current turret angle
         double bestInRange = Double.NaN;
         double bestDist = Double.POSITIVE_INFINITY;
 
@@ -200,7 +180,6 @@ public class Turret extends SubsystemBase {
         }
         if (!Double.isNaN(bestInRange)) return bestInRange;
 
-        // Otherwise clamp each candidate, pick closest to current
         double bestClamped = 0.0;
         bestDist = Double.POSITIVE_INFINITY;
 

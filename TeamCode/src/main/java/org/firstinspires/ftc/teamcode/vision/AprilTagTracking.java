@@ -16,10 +16,8 @@ import java.util.OptionalDouble;
 
 public class AprilTagTracking {
 
-    // Must match the device name in the RC configuration exactly
     private static final String LIMELIGHT_NAME = "limelight";
 
-    // Adjust if your target IDs differ
     private static final int RED_GOAL_TAG_ID = 24;
     private static final int BLUE_GOAL_TAG_ID = 20;
 

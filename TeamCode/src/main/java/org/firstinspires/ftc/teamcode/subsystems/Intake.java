@@ -82,13 +82,8 @@ public class Intake extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // Optional: you could call testSensors() here if you want constant telemetry,
-        // but it may spam. Usually call it from your OpMode loop.
     }
 
-    // ------------------------------
-    // Actuators
-    // ------------------------------
     public void setStopper(double pos) {
         stopper.set(pos);
     }
@@ -128,9 +123,6 @@ public class Intake extends SubsystemBase {
 //        intakeMotor.setPower(1.0);
     }
 
-    // ------------------------------
-    // Detection helpers (voltage -> boolean) with hysteresis
-    // ------------------------------
     private boolean detectWithHysteresisHigherIsDetected(double v, double threshold, boolean prevState) {
         // ON when v >= threshold + HYST
         // OFF when v <  threshold - HYST
@@ -151,9 +143,6 @@ public class Intake extends SubsystemBase {
                 : detectWithHysteresisLowerIsDetected(v, threshold, prevState);
     }
 
-    // ------------------------------
-    // Public detection API (same logic as your digital version)
-    // ------------------------------
     public boolean isBallDetected01() {
         return ((s1.getVoltage()*32.50930976)-2.695384202) < 3.5;
     }
@@ -178,9 +167,6 @@ public class Intake extends SubsystemBase {
         return !areAllBallsDetected();
     }
 
-    // ------------------------------
-    // Telemetry / Debug
-    // ------------------------------
     public void testSensors() {
         double v1 = s1.getVoltage();
         double v2 = s2.getVoltage();
@@ -209,9 +195,6 @@ public class Intake extends SubsystemBase {
         telemetry.update();
     }
 
-    // ------------------------------
-    // Intake status helpers
-    // ------------------------------
     public boolean isIntake1On() {
         return intakeMotor.getPower() > 0.4;
     }
@@ -225,9 +208,6 @@ public class Intake extends SubsystemBase {
         return intakeMotor.getPower() < 0.1;
     }
 
-    // ------------------------------
-    // Auto intake logic (same as your original)
-    // ------------------------------
 
     public void intakeReset() {
         all3 = false;
@@ -235,14 +215,12 @@ public class Intake extends SubsystemBase {
     public void autoIntake() {
         if (!all3) {
 
-            // If all 3 slots are full, stop everything
             if (areAllBallsDetected()) {
                 intakeOff();
                 all3 = true;
                 return;
             }
 
-            // If slot 3 is occupied, disable Intake2 (CRServos), but Intake1 can keep running
             if (isBallDetected03()) {
                 intakeMotor.setPower(1.0);   // Intake1 ON
                 servoA.setPower(0.0);        // Intake2 OFF
@@ -250,7 +228,6 @@ public class Intake extends SubsystemBase {
                 return;
             }
 
-            // Otherwise, run both intakes to collect balls
             intakeMotor.setPower(1.0);       // Intake1 ON
             servoA.setPower(1.0);            // Intake2 ON
             servoB.setPower(1.0);

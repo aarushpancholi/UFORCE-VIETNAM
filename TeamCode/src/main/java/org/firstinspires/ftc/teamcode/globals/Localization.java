@@ -14,7 +14,6 @@ public class Localization {
     private static Follower follower;
     private static TelemetryManager telemetry;
 
-    // Heading velocity estimation
     private static final ElapsedTime timer = new ElapsedTime();
     private static double lastHeading = 0.0;     // rad
     private static double headingVel = 0.0;      // rad/s (filtered)
@@ -24,7 +23,6 @@ public class Localization {
         follower = f;
         telemetry = telemetryManager;
 
-        // Seed state so first velocity calc isn't garbage
         follower.update();
         lastHeading = follower.getHeading();
         headingVel = 0.0;
